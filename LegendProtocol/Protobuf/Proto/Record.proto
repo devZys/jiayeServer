@@ -1,0 +1,64 @@
+//记录系统
+import public "MsgBase.proto";
+package LegendProtocol; 
+
+//日志类型
+enum LogType
+{ 
+    Info = 1;//普通
+    Debug = 2;//调试
+    Error = 3;//错误
+    Fatal = 4;//致命
+}
+
+//关卡统计类型
+enum LevelRecordType
+{
+	//扫荡次数
+	SweepCount = 1;
+	//失败次数
+	FailureCount = 2;
+	//尝试次数
+	TryCount = 3;
+}
+
+//玩家货币行为统计
+message CurrenciesRecordNode
+{
+	optional int32 recordType = 1;
+    optional string recordContext = 2;
+    optional string currenciesRecordContext = 3;
+    optional string time = 4;
+}
+
+//其他服务器通知记录服务器记录日志
+message NotifyRecordLog_X2R { 
+	optional MsgID msgId 			= 1 [default = X2R_NotifyRecordLog];
+	optional string serverName 		= 2;  
+    optional int32 	serverID 		= 3;  
+    optional LogType logType 		= 4;
+    optional string context 		= 5;
+    optional bool isSaveToDB 		= 6 [default = false];
+}
+
+//其他服务器通知记录服务器统计登陆玩家
+message NotifyRecordLoginUser_X2R { 
+	optional MsgID msgId 			= 1 [default = X2R_NotifyRecordLoginUser];
+    optional int32 recordType 		= 2;  
+}
+
+//其他服务器通知记录服务器统计登陆玩家
+message NotifyRecordRoomCard_X2R { 
+	optional MsgID msgId 			= 1 [default = X2R_NotifyRecordRoomCard];
+    optional uint64 summonerId 		= 2;  
+    optional int32 recordType 		= 3;  
+    optional int32 roomCard 		= 4;  
+}
+
+//其他服务器通知记录服务器统计商家信息
+message NotifyRecordBusinessUser_X2R { 
+	optional MsgID msgId 			= 1 [default = X2R_NotifyRecordBusinessUser];
+    optional int32 businessId 		= 2;  
+    optional string lastTime 		= 3;  
+    optional int32 recordType 		= 4;  
+}

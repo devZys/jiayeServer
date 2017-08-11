@@ -1,0 +1,35 @@
+//全局唯一ID分配
+import public "MsgBase.proto";
+package LegendProtocol; 
+
+//UID类型
+enum UIDType
+{ 
+    SummoerID = 1;//玩家ID
+    RoomID = 2;//房间ID
+}
+
+//请求分配UID
+message RequestUID_X2X {
+	optional MsgID msgId = 1 [default = X2X_RequestUID];
+	optional string userId = 2;
+	optional UIDType uidType = 3;
+	optional uint64 summonerId = 4;
+}
+
+//回复分配UID的请求
+message ReplyUID_X2X {
+	optional MsgID msgId = 1 [default = X2X_ReplyUID];
+	optional string userId = 2;
+	optional ResultCode result = 3;
+	optional UIDType uidType = 4;
+	optional uint64 uid = 5;
+	optional uint64 summonerId = 6;
+}
+
+//回收UID
+message NotifyRecycleUID_X2X {
+	optional MsgID msgId = 1 [default = X2X_NotifyRecycleUID];
+	optional UIDType uidType = 2;	
+	optional uint64 uid = 3;
+}

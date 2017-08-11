@@ -1,0 +1,1660 @@
+//公共定义
+import public "MsgBase.proto";
+import public "Common.proto";
+package LegendProtocol; 
+
+//麻将类型
+enum MahjongType
+{  
+	MahjongNone = 0;		//麻将   
+	ChangShaMahjong = 1;	//长沙麻将
+	ZhuanZhuanMahjong = 2;	//转转麻将
+	RedLaiZiMahjong = 3;	//红中麻将
+}
+
+//麻将胡牌类型
+enum WinMahjongType
+{  
+	EWM_None = 0;					//空   
+	EWM_BlastWin = 1;				//点炮
+	EWM_SelfWin = 2;				//自摸
+}
+
+//麻将胡牌类型
+enum SpecialWinMahjongType
+{  
+	ESWM_None = 0;					//空   
+	ESWM_KongWin = 1;				//杠上开花
+	ESWM_SeabedWin = 2;				//海底捞月
+	ESWM_GrabKong = 3;				//抢杠胡
+}
+
+//麻将玩家状态
+enum MahjongPlayerStatus
+{   
+	 MahjongFree = 1;			//空闲 
+	 MahjongReady = 2;			//准备
+	 MahjongPendulum = 3;		//摆牌状态
+	 MahjongPendulumDice = 4;	//摆牌掷骰子状态
+	 MahjongWaitCard = 5;		//等待出牌	 
+	 MahjongShowCard = 6;		//已出牌 	 
+	 MahjongWinCard = 7;		//胡牌 
+}
+
+//房间状态
+enum MahjongHouseStatus
+{     
+	 MHS_FreeBureau = 0;	     //空闲	 
+	 MHS_PendulumBureau = 1;	 //摆牌状态
+	 MHS_BeginBureau = 2;		 //开始状态
+	 MHS_SelectSeabed = 3;		 //海底选牌
+	 MHS_Settlement = 4;		 //结算状态	 
+	 MHS_Dissolved = 5;			 //已经解散
+	 MHS_EndBureau  = 6;		 //结束状态
+	 MHS_GMDissolved = 7;		 //GM命令解散
+}
+
+// 大类型区分.这样能简单的做第一次区分牌型
+enum TileBlurType
+{
+    ETB_Flower = 0;  //花牌
+    ETB_Honor = 1;   //字牌(役牌)
+    ETB_Suit = 2;   //花色(配牌,包括索筒万)
+}
+
+// 详细类型.近一步区分牌型需要的类型判定
+// 比如上一步做简单的3类型区分。两种类型为手牌。其他两类型为手牌,在胡牌算番的时候需要更加详细的区分.
+enum TileDescType
+{
+    ETD_Flower = 0;     //花牌.不属于下面的任何一种.
+    ETD_Dragon = 1;     //箭牌(中、白、发)(大小三元的基本组成)
+    ETD_Wind = 2;       //风牌(东、西、南、北)(大小四喜的基本组成)
+    ETD_Dot = 3;        //筒牌.
+    ETD_Bamboo = 4;     //索牌.
+    ETD_Character = 5;  //万牌.
+}
+
+// 牌的具体数字.(或者字牌具体是哪一张.)
+enum TileNumType
+{
+    ETN_None = 0;      //花牌暂时不用定义.(如果后续玩法有需要可以直接扩充)
+    ETN_One = 1;        // 1-9为索、筒、万 共用.
+    ETN_Two = 2;
+    ETN_Three = 3;
+    ETN_Four = 4;
+    ETN_Five = 5;
+    ETN_Six = 6;
+    ETN_Seven = 7;
+    ETN_Eight = 8;
+    ETN_Nine = 9;
+    ETN_East = 10;       //东.(风牌)
+    ETN_South = 11;      //南.(风牌)
+    ETN_West = 12;      //西.(风牌)
+    ETN_North = 13;     //北.(风牌)
+    ETN_Red = 14;        //红中.(箭牌)
+    ETN_GREEN = 15;      //发财.(箭牌)
+    ETN_White = 16;      //白板.(箭牌)
+}
+
+enum MeldType
+{
+    EM_Pair = 0;            //将牌、对子
+    EM_Sequence = 1;        //顺子
+    EM_Triplet = 2;         //碰
+    EM_ExposedKong = 3;     //明杠
+    EM_ConcealedKong = 4;   //暗杠
+    EM_None = 5;            //非牌组
+}
+
+//操作类型
+enum MahjongOperatType
+{
+    EMO_None = 0;     //非牌组
+    EMO_Chow = 1;  	  //吃
+    EMO_Pong = 2;     //碰
+    EMO_Kong = 3;     //杠
+    EMO_Hu = 4;       //胡
+}
+
+//杠类型
+enum MahjongKongType
+{
+    EMK_None = 0;		  //非
+    EMK_MakeUp = 1;  	  //补章
+    EMK_Kong = 2;		  //杠
+    EMK_InKong = 3;		  //有分杠
+    EMK_NoInKong = 4;	  //无分杠
+}
+
+//麻将特殊类型
+enum MahjongSpecialType
+{
+    EMS_None = 0;		  //非
+    EMS_MakeUp = 1;  	  //补章
+    EMS_Kong = 2;		  //杠
+    EMS_Seabed = 3;		  //选择海底
+}
+
+//麻将记录存储类型
+enum MahjongRecordType
+{
+    EMR_None = 0;		  //非
+    EMR_Pendulum = 1;	  //摆牌
+    EMR_Show = 2;		  //出牌
+    EMR_GiveOff = 3;	  //发牌
+    EMR_Chow = 4;		  //吃
+    EMR_Pong = 5;		  //碰
+    EMR_Kong = 6;		  //杠
+    EMR_KongMahjong = 7;  //杠出牌
+    EMR_Hu = 8;			  //胡
+    EMR_Seabed = 9;		  //海底
+    EMR_PendulumDice = 10;	  //摆牌掷骰
+}
+
+//麻将记录结构
+message MahjongRecordNode
+{
+	optional MahjongRecordType recordType = 1;		//记录存储类型
+	optional bytes recordData = 2;					//记录存储内容
+}
+
+//摆牌记录结构
+message PendulumRecordNode
+{
+	optional int32 playerIndex = 1;					//摆牌玩家
+	optional int32 operatDisplayType = 2;			//摆牌类型
+	repeated int32 mahjongList = 3;					//摆牌麻将
+}
+
+//摆牌掷骰记录结构
+message PendulumDiceRecordNode
+{
+	optional int32 playerIndex = 1;					//摆牌掷骰玩家
+	optional int32 pendulumDice = 2;				//摆牌骰子
+}
+
+//麻将牌记录结构
+message MahjongNodeRecordNode
+{
+	optional int32 playerIndex = 1;					//玩家
+	optional int32 mahjongNode = 2;					//麻将
+}
+
+//操作记录结构
+message MahjongOperatRecordNode
+{
+	optional int32 playerIndex = 1;					//玩家
+	optional MeldType meldType = 2;					//操作类型
+	repeated int32 meldMahjongList = 3;				//操作麻将
+	optional int32 lastPlayerIndex = 4;				//上一个玩家
+	optional MahjongKongType kongType = 5;			//杠类型
+	optional bool bOperatHand = 6;					//操作方式
+}
+
+//杠操作记录结构
+message MahjongKongRecordNode
+{
+	optional int32 playerIndex = 1;					//玩家
+	repeated int32 kongMahjongList = 2;				//杠出来的麻将
+}
+
+//海底操作记录结构
+message MahjongSeabedRecordNode
+{
+	optional int32 playerIndex = 1;					//玩家
+	repeated int32 mahjongList = 2;					//海底的麻将
+}
+
+//麻将胡记录结构
+message MahjongWinRecordNode
+{
+	repeated PlayerTileNode winPlayerList = 1;		//胡的玩家
+	optional int32 mahjongPlayerIndex = 2;			//胡的麻将归属
+	optional int32 showBirdIndex = 3;				//鸟所在位置
+	repeated int32 mahjongBirdList = 4;				//鸟
+	optional int32 specialWinMahjongType = 5;		//特殊胡牌类型
+}
+
+//操作结构
+message MahjongOperatNode
+{
+	optional int32 playerIndex = 1;						//玩家编号
+	optional MahjongOperatType defaultOperatType = 2;	//默认操作类型
+	optional bool bWait = 3;							//是否等待
+	repeated int32 operatMahjonList = 4;
+	optional MahjongOperatType operatedType = 5;		//玩家选择的操作类型
+}
+
+//杠结构
+message MahjongKongNode
+{
+	optional MahjongKongType kongType = 1;					//杠类型
+	repeated MahjongSelectNode kongHuPlayerList = 2;		//抢杠胡的玩家
+}
+
+//玩家是否选择
+message MahjongSelectNode
+{
+	optional int32 playerIndex = 1;				//玩家编号
+	optional bool bWait = 2;					//是否等待
+}
+
+//麻将结构
+//message MahjongNode
+//{
+//	optional TileBlurType blurType = 1;		// 大类型区分.这样能简单的做第一次区分牌型
+//	optional TileDescType descType = 2;		// 详细类型.近一步区分牌型需要的类型判定
+//	optional TileNumType numType = 3;		// 牌的具体数字
+//}
+
+//麻将手牌个数
+message MahjongCountNode
+{
+	optional int32 playerIndex = 1;						//玩家编号
+	optional int32 headMahjongCount = 2;				//手牌个数
+}
+
+//麻将牌组结构
+message MeldNode
+{
+	optional MeldType meldType = 1;
+	repeated int32 meldTileList = 2;
+}
+
+ //玩家的胡牌
+message PlayerWinMahjongNode
+{
+	optional int32 playerIndex = 1;
+	repeated int32 winMahjongList = 2;
+	repeated int32 handMahjongList = 3;
+}
+
+//麻将回放结构
+message PlayerPlaybackMahjong
+{
+	repeated PlayerTileNode playerInitTileList = 1;
+	repeated MahjongRecordNode mahjongRecordList = 2;
+}
+
+//玩家当局信息
+message MahjongPlayerBureau
+{
+    optional int32 playerIndex = 1;   
+    optional int32 startDisplayType = 2;	 //摆牌类型(放杠次数)   
+    optional int32 bureauIntegral = 3;		 //当局总积分
+    optional int32 mahjongWinType = 4;		 //胡牌类型 
+    optional int32 winBirdNumber = 5;		 //中鸟个数  
+    optional int32 midwayPendulum = 6;		 //中途四喜次数
+}
+
+//麻将当局信息
+message MahjongHouseBureau
+{
+    optional uint64 bureau = 1;   
+    repeated MahjongPlayerBureau playerBureauList = 2;
+    optional string bureauTime = 3;   
+}
+
+//玩家当局结算信息
+message MahjongSettlementNode
+{
+    optional int32 playerIndex = 1;   
+    optional int32 startDisplayType = 2;	 //摆牌类型   
+    optional int32 bureauIntegral = 3;		 //当局总积分
+    optional int32 mahjongWinType = 4;		 //胡牌类型 
+    optional int32 winBirdNumber = 5;		 //中鸟个数 
+    optional int32 allIntegral = 6;			 //总积分   
+	repeated int32 mahjongList = 7;
+	optional int32 midwayPendulum = 8;		//中途四喜次数
+	optional bool bIntegralCapped = 9;		//有未封顶
+}
+
+//最后结算玩家
+message MahjongEndSettlementNode
+{
+	optional int32 index = 1;
+	optional int32 bigWinMyself = 2;
+    optional int32 smallWinMyself = 3;
+    optional int32 bigWinFangBlast = 4;
+    optional int32 smallWinFangBlast = 5;
+    optional int32 bigWinJieBlast = 6;
+    optional int32 smallWinJieBlast = 7;
+    optional int32 allIntegral = 8;			 //总积分   
+}
+
+//上线的玩家结构
+message MahjongPlayerOnlineNode
+{
+	optional int32 index = 1;
+	optional MahjongPlayerStatus housePlayerStatus = 2;
+	optional int32 headMahjongCount = 3;
+	optional string nickName = 4;
+	optional int32 allIntegral = 5;
+	optional uint64 summonerId = 6;
+	optional LineType lineType = 7;
+    optional VoteStatus voteStatus = 8;
+    optional UserSex sex = 9;
+    repeated int32 showMahjongList = 10;
+    optional string ip = 11;
+    repeated MeldNode displayMahjongList = 12;
+}
+
+//上线的玩家结构
+message MahjongMyPlayerOnlineNode
+{
+	optional int32 index = 1;
+	optional MahjongPlayerStatus housePlayerStatus = 2;
+	optional int32 allIntegral = 3;
+    optional VoteStatus voteStatus = 4;
+	optional int32 startDisplayType = 5;
+	optional bool bReadyHand = 6;
+	optional bool bGiveUpWin = 7;
+	repeated int32 playerMahjongList = 8;
+    repeated MeldNode displayMahjongList = 9;
+    repeated int32 showMahjongList = 10;
+	optional int32 newMahjongNode = 11;
+	optional int32 currPongNode = 12;
+    optional bool bHosted = 13;
+	repeated int32 displayFourTileList = 14;
+}
+
+//麻将上线结构
+message MahjongOnlineNode
+{
+	optional MahjongMyPlayerOnlineNode myPlayerOnline = 1;
+	repeated MahjongPlayerOnlineNode playerOnlineList = 2;
+}
+
+//简单的玩家结构
+message MahjongPlayerShowNode
+{
+	optional int32 index = 1;
+	optional MahjongPlayerStatus housePlayerStatus = 2;
+    optional string ip = 3;
+	optional string nickName = 4;
+	optional int32 allIntegral = 5;
+	optional uint64 summonerId = 6;
+	optional LineType lineType = 7;
+    optional UserSex sex = 8;
+}
+
+//麻将房间保存结构
+message MahjongHouseNode
+{
+	optional uint64 houseId = 1;
+    optional int32 houseCardId = 2;
+    optional int32 currentBureau = 3;
+    optional int32 maxBureau = 4;
+    optional int32 maxPlayerNum = 5;
+	optional int32 businessId = 6;
+	optional int32 housePropertyType = 7;
+    optional int32 catchBird = 8;
+    optional HouseType houseType = 9;
+    optional MahjongType mahjongType = 10;
+    optional MahjongHouseStatus houseStatus = 11;
+    optional string createTime = 12;
+    optional int32 logicId = 13;
+	optional int32 flutter = 14;
+}
+
+//房间玩家结构
+message MahjongHousePlayerNode
+{
+    optional string userId = 1;
+    optional int32 playerIndex = 2;
+	optional uint64 summonerId = 3;
+    optional string nickName = 4;
+    optional UserSex sex = 5;
+    optional int32 allIntegral = 6;
+    optional ZhuangLeisureType zhuangLeisureType = 7;
+	optional int32 bigWinMyself = 8;
+    optional int32 smallWinMyself = 9;
+    optional int32 bigWinFangBlast = 10;
+    optional int32 smallWinFangBlast = 11;
+    optional int32 bigWinJieBlast = 12;
+    optional int32 smallWinJieBlast = 13;
+}
+
+//麻将玩家和当局结构
+message MahjongPlayerBureauNode
+{
+    repeated MahjongHousePlayerNode mahjongPlayerList = 1;
+    repeated MahjongHouseBureau mahjongBureauList = 2;
+}
+
+//协议结构
+/// <summary>
+/// 玩家向网关服务器请求创建麻将房间
+message RequestCreateMahjongHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestCreateMahjongHouse];
+	optional MahjongType mahjongType = 2;
+	optional int32 maxBureau = 3;
+    optional int32 maxPlayerNum = 4;
+	optional int32 catchBird = 5;
+	optional int32 housePropertyType = 6;
+	optional int32 flutter = 7;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求创建麻将房间
+message RequestCreateMahjongHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestCreateMahjongHouse];
+    optional uint64 summonerId = 2;
+	optional MahjongType mahjongType = 3;
+	optional int32 maxBureau = 4;
+    optional int32 maxPlayerNum = 5;
+	optional int32 catchBird = 6;
+	optional int32 housePropertyType = 7;
+	optional int32 flutter = 8;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家创建麻将房间
+message ReplyCreateMahjongHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyCreateMahjongHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional MahjongType mahjongType = 4;
+	optional int32 maxBureau = 5;
+	optional int32 houseId = 6;
+	optional int32 allIntegral = 7;
+	optional uint64 onlyHouseId = 8;
+    optional int32 maxPlayerNum = 9;
+	optional int32 catchBird = 10;
+	optional int32 businessId = 11;
+	optional int32 housePropertyType = 12;
+	optional int32 competitionKey = 13;
+	optional int32 flutter = 14;
+	optional MahjongPlayerStatus housePlayerStatus = 15;
+}
+/// <summary>
+/// 网关服务器响应玩家创建麻将房间
+message ReplyCreateMahjongHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyCreateMahjongHouse];
+    optional ResultCode result = 2;
+	optional MahjongType mahjongType = 3;
+	optional int32 maxBureau = 4;
+	optional int32 houseId = 5;
+	optional int32 allIntegral = 6;
+	optional uint64 onlyHouseId = 7;
+    optional int32 maxPlayerNum = 8;
+	optional int32 catchBird = 9;
+	optional int32 businessId = 10;
+	optional int32 housePropertyType = 11;
+	optional int32 competitionKey = 12;
+	optional int32 flutter = 13;
+	optional MahjongPlayerStatus housePlayerStatus = 14;
+}
+/// <summary>
+/// 玩家向网关服务器请求加入麻将房间
+message RequestJoinMahjongHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestJoinMahjongHouse];
+	optional int32 houseId = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求加入麻将房间
+message RequestJoinMahjongHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestJoinMahjongHouse];
+    optional uint64 summonerId = 2;
+	optional int32 houseId = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家加入麻将房间
+message ReplyJoinMahjongHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyJoinMahjongHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional MahjongType mahjongType = 4;
+	optional int32 maxBureau = 5;
+	optional int32 houseId = 6;
+	optional bytes playerShow = 7;
+	optional int32 allIntegral = 8;
+	optional uint64 onlyHouseId = 9;
+    optional int32 maxPlayerNum = 10;
+	optional int32 catchBird = 11;
+	optional int32 businessId = 12;
+	optional int32 housePropertyType = 13;
+	optional int32 myIndex = 14;
+	optional int32 competitionKey = 15;
+	optional int32 flutter = 16;
+	optional MahjongPlayerStatus housePlayerStatus = 17;
+}
+/// <summary>
+/// 网关服务器响应玩家加入麻将房间
+message ReplyJoinMahjongHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyJoinMahjongHouse];
+    optional ResultCode result = 2;
+	optional MahjongType mahjongType = 3;
+	optional int32 maxBureau = 4;
+	optional int32 houseId = 5;
+	optional bytes playerShow = 6;
+	optional int32 allIntegral = 7;
+	optional uint64 onlyHouseId = 8;
+    optional int32 maxPlayerNum = 9;
+	optional int32 catchBird = 10;
+	optional int32 businessId = 11;
+	optional int32 housePropertyType = 12;
+	optional int32 myIndex = 13;
+	optional int32 competitionKey = 14;
+	optional int32 flutter = 15;
+	optional MahjongPlayerStatus housePlayerStatus = 16;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家加入麻将房间
+message RecvJoinMahjongHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvJoinMahjongHouse];
+    optional uint64 summonerId = 2;
+	optional MahjongPlayerShowNode playerShow = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家加入麻将房间
+message RecvJoinMahjongHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvJoinMahjongHouse];
+	optional MahjongPlayerShowNode playerShow = 2;
+}
+/// <summary>
+/// 玩家向网关服务器请求退出房间
+message RequestQuitMahjongHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestQuitMahjongHouse];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求退出房间
+message RequestQuitMahjongHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestQuitMahjongHouse];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器退出房间
+message ReplyQuitMahjongHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyQuitMahjongHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional bool bVote = 4;
+    optional int32 dissolveVoteTime = 5;
+}
+/// <summary>
+/// 网关服务器响应玩家退出房间
+message ReplyQuitMahjongHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyQuitMahjongHouse];
+    optional ResultCode result = 2;
+	optional bool bVote = 3;
+    optional int32 dissolveVoteTime = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家退出房间
+message RecvQuitMahjongHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvQuitMahjongHouse];
+    optional uint64 summonerId = 2;
+	optional bool bVote = 3;
+    optional int32 index = 4;
+    optional int32 dissolveVoteTime = 5;
+}
+/// <summary>
+/// 网关服务器响应玩家退出房间
+message RecvQuitMahjongHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvQuitMahjongHouse];
+	optional bool bVote = 2;
+    optional int32 index = 3;
+    optional int32 dissolveVoteTime = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家离开房间
+message RecvLeaveMahjongHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvLeaveMahjongHouse];
+    optional uint64 summonerId = 2;
+	optional int32 leaveIndex = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家离开房间
+message RecvLeaveMahjongHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvLeaveMahjongHouse];
+	optional int32 leaveIndex = 2;
+}
+/// <summary>
+/// 玩家向网关服务器请求解散房间投票
+message RequestMahjongHouseVote_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestMahjongHouseVote];
+	optional VoteStatus voteStatus = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求解散房间投票
+message RequestMahjongHouseVote_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestMahjongHouseVote];
+    optional uint64 summonerId = 2;
+	optional VoteStatus voteStatus = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器解散房间投票
+message ReplyMahjongHouseVote_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyMahjongHouseVote];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional VoteStatus voteStatus = 4;
+	optional VoteStatus houseVoteStatus = 5;
+}
+/// <summary>
+/// 网关服务器响应房间解散房间投票
+message ReplyMahjongHouseVote_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyMahjongHouseVote];
+    optional ResultCode result = 2;
+	optional VoteStatus voteStatus = 3;
+	optional VoteStatus houseVoteStatus = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器解散房间投票
+message RecvMahjongHouseVote_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvMahjongHouseVote];
+    optional uint64 summonerId = 2;
+	optional int32 index = 3;
+	optional VoteStatus voteStatus = 4;
+	optional VoteStatus houseVoteStatus = 5;
+}
+/// <summary>
+/// 网关服务器响应解散房间投票
+message RecvMahjongHouseVote_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvMahjongHouseVote];
+	optional int32 index = 2;
+	optional VoteStatus voteStatus = 3;
+	optional VoteStatus houseVoteStatus = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求准备
+message RequestReadyMahjongHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestReadyMahjongHouse];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求准备
+message RequestReadyMahjongHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestReadyMahjongHouse];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器准备
+message ReplyReadyMahjongHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyReadyMahjongHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家准备
+message ReplyReadyMahjongHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyReadyMahjongHouse];
+    optional ResultCode result = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家准备
+message RecvReadyMahjongHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvReadyMahjongHouse];
+    optional uint64 summonerId = 2;
+	optional int32 readyIndex = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家准备
+message RecvReadyMahjongHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvReadyMahjongHouse];
+	optional int32 readyIndex = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器开始麻将
+message RecvBeginMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvBeginMahjong];
+    optional uint64 summonerId = 2;
+	optional int32 currentShowCard = 3;
+	optional int32 currentBureau = 4;
+	repeated int32 mahjongList = 5;
+	optional MahjongPlayerStatus housePlayerStatus = 6;
+	optional int32 zhuangIndex = 7;
+    optional MahjongHouseStatus houseStatus = 8;
+	repeated MahjongCountNode mahjongCountList = 9;
+	optional int32 remainMahjongCount = 10;
+	optional int32 startDisplayType = 11;
+}
+/// <summary>
+/// 网关服务器响应开始麻将
+message RecvBeginMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvBeginMahjong];
+	optional int32 currentShowCard = 2;
+	optional int32 currentBureau = 3;
+	repeated int32 mahjongList = 4;
+	optional MahjongPlayerStatus housePlayerStatus = 5;
+	optional int32 zhuangIndex = 6;
+    optional MahjongHouseStatus houseStatus = 7;
+	repeated MahjongCountNode mahjongCountList = 8;
+	optional int32 remainMahjongCount = 9;
+	optional int32 startDisplayType = 10;
+}
+/// <summary>
+/// 玩家向网关服务器请求房间信息
+message RequestMahjongHouseInfo_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestMahjongHouseInfo];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求房间信息
+message RequestMahjongHouseInfo_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestMahjongHouseInfo];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器房间信息
+message ReplyMahjongHouseInfo_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyMahjongHouseInfo];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional int32 houseId = 4;
+    optional MahjongHouseStatus houseStatus = 5;
+	optional MahjongType mahjongType = 6;
+	optional int32 maxBureau = 7;
+	optional int32 currentBureau = 8;
+	optional int32 currentShowCard = 9;
+	optional int32 currentWhoPlay = 10;
+	repeated int32 currentMahjongList = 11;
+	optional bytes mahjongOnlineNode = 12;
+	optional double houseVoteTime = 13;
+	optional uint64 onlyHouseId = 14;
+	optional int32 housePropertyType = 15;
+    optional int32 maxPlayerNum = 16;
+	optional int32 catchBird = 17;
+	optional int32 businessId = 18;
+	optional int32 remainMahjongCount = 19;
+	optional bool bNeedOperat = 20;
+	optional int32 zhuangIndex = 21;
+	optional MahjongSpecialType mahjongSpecialType = 22;
+	optional int32 competitionKey = 23;
+	optional int32 flutter = 24;
+	optional bool bFakeHu = 25;
+}
+/// <summary>
+/// 网关服务器响应房间信息
+message ReplyMahjongHouseInfo_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyMahjongHouseInfo];
+    optional ResultCode result = 2;
+	optional int32 houseId = 3;
+    optional MahjongHouseStatus houseStatus = 4;
+	optional MahjongType mahjongType = 5;
+	optional int32 maxBureau = 6;
+	optional int32 currentBureau = 7;
+	optional int32 currentShowCard = 8;
+	optional int32 currentWhoPlay = 9;
+	repeated int32 currentMahjongList = 10;
+	optional double houseVoteTime = 11;
+	optional uint64 onlyHouseId = 12;
+	optional int32 housePropertyType = 13;
+    optional int32 maxPlayerNum = 14;
+	optional int32 catchBird = 15;
+	optional int32 businessId = 16;
+	optional int32 remainMahjongCount = 17;
+	optional bool bNeedOperat = 18;
+	optional int32 zhuangIndex = 19;
+	optional MahjongSpecialType mahjongSpecialType = 20;
+	optional bytes mahjongOnlineNode = 21;
+	optional int32 competitionKey = 22;
+	optional int32 flutter = 23;
+	optional bool bFakeHu = 24;
+}
+/// <summary>
+/// 玩家向网关服务器请求摆牌
+message RequestMahjongPendulum_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestMahjongPendulum];
+	optional int32 startDisplayType = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求摆牌
+message RequestMahjongPendulum_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestMahjongPendulum];
+    optional uint64 summonerId = 2;
+	optional int32 startDisplayType = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器摆牌
+message ReplyMahjongPendulum_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyMahjongPendulum];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional int32 startDisplayType = 4;
+	repeated int32 mahjongList = 5;
+}
+/// <summary>
+/// 网关服务器响应房间摆牌
+message ReplyMahjongPendulum_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyMahjongPendulum];
+    optional ResultCode result = 2;
+	optional int32 startDisplayType = 3;
+	repeated int32 mahjongList = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器摆牌
+message RecvMahjongPendulum_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvMahjongPendulum];
+    optional uint64 summonerId = 2;
+	optional int32 index = 3;
+	optional int32 startDisplayType = 4;
+	repeated int32 mahjongList = 5;
+}
+/// <summary>
+/// 网关服务器响应摆牌
+message RecvMahjongPendulum_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvMahjongPendulum];
+	optional int32 index = 2;
+	optional int32 startDisplayType = 3;
+	repeated int32 mahjongList = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器结束摆牌
+message RecvMahjongEndPendulum_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvMahjongEndPendulum];
+    optional uint64 summonerId = 2;
+	optional int32 currentShowCard = 3;
+	optional MahjongPlayerStatus housePlayerStatus = 4;
+    optional MahjongHouseStatus houseStatus = 5;
+}
+/// <summary>
+/// 网关服务器响应结束出牌
+message RecvMahjongEndPendulum_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvMahjongEndPendulum];
+	optional int32 currentShowCard = 2;
+	optional MahjongPlayerStatus housePlayerStatus = 3;
+    optional MahjongHouseStatus houseStatus = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求出牌
+message RequestShowMahjong_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestShowMahjong];
+	optional int32 mahjongNode = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求出牌
+message RequestShowMahjong_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestShowMahjong];
+    optional uint64 summonerId = 2;
+	optional int32 mahjongNode = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器出牌
+message ReplyShowMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyShowMahjong];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional int32 mahjongNode = 4;
+}
+/// <summary>
+/// 网关服务器响应房间出牌
+message ReplyShowMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyShowMahjong];
+    optional ResultCode result = 2;
+	optional int32 mahjongNode = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器出牌
+message RecvShowMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvShowMahjong];
+    optional uint64 summonerId = 2;
+	optional int32 index = 3;
+	optional bool bIsNeed = 4;
+	optional int32 mahjongNode = 5;
+}
+/// <summary>
+/// 网关服务器响应出牌
+message RecvShowMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvShowMahjong];
+	optional int32 index = 2;
+	optional bool bIsNeed = 3;
+	optional int32 mahjongNode = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器发牌
+message RecvGiveOffMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvGiveOffMahjong];
+    optional uint64 summonerId = 2;
+	optional int32 currentShowCard = 3;
+	optional MahjongPlayerStatus housePlayerStatus = 4;
+	optional int32 mahjongNode = 5;	
+	repeated PlayerIntegral playerIntegralList = 6;
+}
+/// <summary>
+/// 网关服务器响应发牌
+message RecvGiveOffMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvGiveOffMahjong];
+	optional int32 currentShowCard = 2;
+	optional MahjongPlayerStatus housePlayerStatus = 3;
+	optional int32 mahjongNode = 4;
+	repeated PlayerIntegral playerIntegralList = 5;
+}
+/// <summary>
+/// 玩家向网关服务器请求操作
+message RequestOperatMahjong_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestOperatMahjong];
+	optional MahjongOperatType operatType = 2;
+	repeated int32 mahjongNode = 3;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求操作
+message RequestOperatMahjong_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestOperatMahjong];
+    optional uint64 summonerId = 2;
+	optional MahjongOperatType operatType = 3;
+	repeated int32 mahjongNode = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器操作
+message ReplyOperatMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyOperatMahjong];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional MahjongOperatType operatType = 4;
+	repeated int32 mahjongNode = 5;
+	optional MeldType meldType = 6;
+	optional int32 currentShowCard = 7;
+	optional MahjongPlayerStatus housePlayerStatus = 8;
+	optional MahjongKongType kongType = 9;
+	optional bool bGiveUpWin = 10;
+	optional bool bOperatMySelf = 11;
+	optional bool bOperatHand = 12;
+	optional bool bFakeHu = 13;
+}
+/// <summary>
+/// 网关服务器响应房间操作
+message ReplyOperatMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyOperatMahjong];
+    optional ResultCode result = 2;
+	optional MahjongOperatType operatType = 3;
+	repeated int32 mahjongNode = 4;
+	optional MeldType meldType = 5;
+	optional int32 currentShowCard = 6;
+	optional MahjongPlayerStatus housePlayerStatus = 7;
+	optional MahjongKongType kongType = 8;
+	optional bool bGiveUpWin = 9;
+	optional bool bOperatMySelf = 10;
+	optional bool bOperatHand = 11;
+	optional bool bFakeHu = 12;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器操作
+message RecvOperatMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvOperatMahjong];
+    optional uint64 summonerId = 2;
+	optional MahjongOperatType operatType = 3;
+	repeated int32 mahjongNode = 4;
+	optional MeldType meldType = 5;
+	optional int32 currentShowCard = 6;
+	optional MahjongPlayerStatus housePlayerStatus = 7;
+	optional bool bNeedKongWin = 8;
+	optional MahjongKongType kongType = 9;
+	optional bool bGiveUpWin = 10;
+	optional bool bOperatMySelf = 11;
+	optional bool bOperatHand = 12;
+	optional bool bFakeHu = 13;
+}
+/// <summary>
+/// 网关服务器下发房间操作
+message RecvOperatMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvOperatMahjong];
+	optional MahjongOperatType operatType = 2;
+	repeated int32 mahjongNode = 3;
+	optional MeldType meldType = 4;
+	optional int32 currentShowCard = 5;
+	optional MahjongPlayerStatus housePlayerStatus = 6;
+	optional bool bNeedKongWin = 7;
+	optional MahjongKongType kongType = 8;
+	optional bool bGiveUpWin = 9;
+	optional bool bOperatMySelf = 10;
+	optional bool bOperatHand = 11;
+	optional bool bFakeHu = 12;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器胡牌
+message RecvPlayerWinMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvPlayerWinMahjong];
+    optional uint64 summonerId = 2;
+	optional WinMahjongType winType = 3;
+	repeated PlayerWinMahjongNode winPlayerList = 4;
+	optional int32 showBirdIndex = 5;
+	repeated int32 mahjongBirdList = 6;
+	optional int32 mahjongPlayerIndex = 7;
+	optional SpecialWinMahjongType specialWinMahjongType = 8;
+}
+/// <summary>
+/// 网关服务器下发房间胡牌
+message RecvPlayerWinMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvPlayerWinMahjong];
+	optional WinMahjongType winType = 2;
+	repeated PlayerWinMahjongNode winPlayerList = 3;
+	optional int32 showBirdIndex = 4;
+	repeated int32 mahjongBirdList = 5;
+	optional int32 mahjongPlayerIndex = 6;
+	optional SpecialWinMahjongType specialWinMahjongType = 7;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器杠牌
+message RecvKongMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvKongMahjong];
+    optional uint64 summonerId = 2;
+	optional int32 plyerIndex = 3;
+	repeated int32 kongMahjongList = 4;
+	optional bool bNeed = 5;
+	optional bool bFakeHu = 6;
+}
+/// <summary>
+/// 网关服务器下发房间杠牌
+message RecvKongMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvKongMahjong];
+	optional int32 plyerIndex = 2;
+	repeated int32 kongMahjongList = 3;
+	optional bool bNeed = 4;
+	optional bool bFakeHu = 5;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器小局结算
+message RecvSettlementMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvSettlementMahjong];
+    optional uint64 summonerId = 2;
+	optional bytes mahjongSettlement = 3;
+    optional bool bLiuJu = 4;
+}
+/// <summary>
+/// 网关服务器下发小局结算
+message RecvSettlementMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvSettlementMahjong];
+	optional bytes mahjongSettlement = 2;
+    optional bool bLiuJu = 3;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器大局结算
+message RecvEndSettlementMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvEndSettlementMahjong];
+    optional uint64 summonerId = 2;
+	repeated MahjongEndSettlementNode mahjongEndSettlementList = 3;
+	optional MahjongHouseStatus houseStatus = 4;
+	optional int32 allIntegral = 5;
+	optional TicketsNode ticketsNode = 6;
+}
+/// <summary>
+/// 网关服务器下发大局结算
+message RecvEndSettlementMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvEndSettlementMahjong];
+	repeated MahjongEndSettlementNode mahjongEndSettlementList = 2;
+	optional MahjongHouseStatus houseStatus = 3;
+	optional int32 allIntegral = 4;
+	optional TicketsNode ticketsNode = 5;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器选择海底麻将
+message RecvSelectSeabedMahjong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvSelectSeabedMahjong];
+    optional uint64 summonerId = 2;
+	optional int32 selectSeabedIndex = 3;
+	optional MahjongHouseStatus houseStatus = 4;
+}
+/// <summary>
+/// 网关服务器下发选择海底麻将
+message RecvSelectSeabedMahjong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvSelectSeabedMahjong];
+	optional int32 selectSeabedIndex = 2;
+	optional MahjongHouseStatus houseStatus = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求选择海底
+message RequestPlayerSelectSeabed_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestPlayerSelectSeabed];
+	optional bool bNeed = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求选择海底
+message RequestPlayerSelectSeabed_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestPlayerSelectSeabed];
+    optional uint64 summonerId = 2;
+	optional bool bNeed = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器选择海底
+message ReplyPlayerSelectSeabed_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyPlayerSelectSeabed];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional bool bNeed = 4;
+	repeated int32 seabedMahjongList = 5;
+	optional bool bFakeHu = 6;
+}
+/// <summary>
+/// 网关服务器响应选择海底
+message ReplyPlayerSelectSeabed_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyPlayerSelectSeabed];
+    optional ResultCode result = 2;
+	optional bool bNeed = 3;
+	repeated int32 seabedMahjongList = 4;
+	optional bool bFakeHu = 5;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器选择海底
+message RecvPlayerSelectSeabed_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvPlayerSelectSeabed];
+    optional uint64 summonerId = 2;
+	optional int32 playerIndex = 3;
+	repeated int32 seabedMahjongList = 4;
+	optional bool bNeedHu = 5;
+	optional bool bFakeHu = 6;
+}
+/// <summary>
+/// 网关服务器下发选择海底
+message RecvPlayerSelectSeabed_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvPlayerSelectSeabed];
+	optional int32 playerIndex = 2;
+	repeated int32 seabedMahjongList = 3;
+	optional bool bNeedHu = 4;
+	optional bool bFakeHu = 5;
+}
+/// <summary>
+/// 玩家向网关服务器请求大局战绩
+message RequestMahjongOverallRecord_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestMahjongOverallRecord];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求大局战绩
+message RequestMahjongOverallRecord_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestMahjongOverallRecord];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器请求大局战绩
+message RequestMahjongOverallRecord_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestMahjongOverallRecord];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// DB服务器响应大局战绩
+message ReplyMahjongOverallRecord_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyMahjongOverallRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional bytes overallRecord = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器大局战绩
+message ReplyMahjongOverallRecord_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyMahjongOverallRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional bytes overallRecord = 4;
+}
+/// <summary>
+/// 网关服务器响应房间大局战绩
+message ReplyMahjongOverallRecord_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyMahjongOverallRecord];
+    optional ResultCode result = 2;
+	optional bytes overallRecord = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求小局战绩
+message RequestMahjongBureauRecord_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestMahjongBureauRecord];
+	optional uint64 onlyHouseId = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求小局战绩
+message RequestMahjongBureauRecord_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestMahjongBureauRecord];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+}
+/// <summary>
+/// 逻辑服务器请求小局战绩
+message RequestMahjongBureauRecord_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestMahjongBureauRecord];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+}
+/// <summary>
+/// DB服务器响应小局战绩
+message ReplyMahjongBureauRecord_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyMahjongBureauRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional bytes bureauRecord = 5;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器小局战绩
+message ReplyMahjongBureauRecord_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyMahjongBureauRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional bytes bureauRecord = 5;
+}
+/// <summary>
+/// 网关服务器响应房间小局战绩
+message ReplyMahjongBureauRecord_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyMahjongBureauRecord];
+    optional ResultCode result = 2;
+	optional uint64 onlyHouseId = 3;
+	optional bytes bureauRecord = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求小局回放
+message RequestMahjongBureauPlayback_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestMahjongBureauPlayback];
+	optional uint64 onlyHouseId = 2;
+	optional uint64 bureau = 3;	
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求小局回放
+message RequestMahjongBureauPlayback_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestMahjongBureauPlayback];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+	optional uint64 bureau = 4;	
+}
+/// <summary>
+/// 逻辑服务器请求小局回放
+message RequestMahjongBureauPlayback_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestMahjongBureauPlayback];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+	optional uint64 bureau = 4;	
+}
+/// <summary>
+/// DB服务器响应小局回放
+message ReplyMahjongBureauPlayback_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyMahjongBureauPlayback];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional uint64 bureau = 5;
+	optional bytes playerMahjong = 6;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器小局回放
+message ReplyMahjongBureauPlayback_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyMahjongBureauPlayback];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional uint64 bureau = 5;	
+	optional bytes playerMahjong = 6;
+}
+/// <summary>
+/// 网关服务器响应房间小局回放
+message ReplyMahjongBureauPlayback_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyMahjongBureauPlayback];
+    optional ResultCode result = 2;
+	optional uint64 onlyHouseId = 3;
+	optional uint64 bureau = 4;	
+	optional bytes playerMahjong = 5;
+}
+/// <summary>
+/// 玩家向网关服务器请求摆牌掷骰子
+message RequestMahjongPendulumDice_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestMahjongPendulumDice];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求摆牌掷骰子
+message RequestMahjongPendulumDice_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestMahjongPendulumDice];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器摆牌掷骰子
+message ReplyMahjongPendulumDice_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyMahjongPendulumDice];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional int32 nextPendulumIndex = 4;
+	optional int32 pendulumDice = 5;
+	repeated PlayerIntegral playerIntegralList = 6;
+}
+/// <summary>
+/// 网关服务器响应房间摆牌掷骰子
+message ReplyMahjongPendulumDice_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyMahjongPendulumDice];
+    optional ResultCode result = 2;
+	optional int32 nextPendulumIndex = 3;
+	optional int32 pendulumDice = 4;
+	repeated PlayerIntegral playerIntegralList = 5;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器摆牌掷骰子
+message RecvMahjongPendulumDice_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvMahjongPendulumDice];
+    optional uint64 summonerId = 2;
+	optional int32 nextPendulumIndex = 3;
+	optional int32 index = 4;
+	optional int32 pendulumDice = 5;
+	repeated PlayerIntegral playerIntegralList = 6;
+}
+/// <summary>
+/// 网关服务器响应摆牌掷骰子
+message RecvMahjongPendulumDice_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvMahjongPendulumDice];
+	optional int32 index = 2;
+	optional int32 nextPendulumIndex = 3;
+	optional int32 pendulumDice = 4;
+	repeated PlayerIntegral playerIntegralList = 5;
+}
+/// <summary>
+/// 玩家向网关服务器请求摆牌
+message RequestMahjongMidwayPendulum_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestMahjongMidwayPendulum];
+	optional int32 mahjongNode = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求摆牌
+message RequestMahjongMidwayPendulum_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestMahjongMidwayPendulum];
+    optional uint64 summonerId = 2;
+	optional int32 mahjongNode = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器摆牌
+message ReplyMahjongMidwayPendulum_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyMahjongMidwayPendulum];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	repeated int32 mahjongList = 4;
+}
+/// <summary>
+/// 网关服务器响应房间摆牌
+message ReplyMahjongMidwayPendulum_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyMahjongMidwayPendulum];
+    optional ResultCode result = 2;
+	repeated int32 mahjongList = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器摆牌
+message RecvMahjongMidwayPendulum_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvMahjongMidwayPendulum];
+    optional uint64 summonerId = 2;
+	optional int32 index = 3;
+	repeated int32 mahjongList = 4;
+}
+/// <summary>
+/// 网关服务器响应摆牌
+message RecvMahjongMidwayPendulum_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvMahjongMidwayPendulum];
+	optional int32 index = 2;
+	repeated int32 mahjongList = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求摆牌掷骰子
+message RequestMahjongMidwayPendulumDice_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestMahjongMidwayPendulumDice];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求摆牌掷骰子
+message RequestMahjongMidwayPendulumDice_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestMahjongMidwayPendulumDice];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器摆牌掷骰子
+message ReplyMahjongMidwayPendulumDice_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyMahjongMidwayPendulumDice];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional int32 pendulumDice = 4;
+	repeated PlayerIntegral playerIntegralList = 5;
+}
+/// <summary>
+/// 网关服务器响应房间摆牌掷骰子
+message ReplyMahjongMidwayPendulumDice_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyMahjongMidwayPendulumDice];
+    optional ResultCode result = 2;
+	optional int32 pendulumDice = 3;
+	repeated PlayerIntegral playerIntegralList = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器摆牌掷骰子
+message RecvMahjongMidwayPendulumDice_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvMahjongMidwayPendulumDice];
+    optional uint64 summonerId = 2;
+	optional int32 index = 3;
+	optional int32 pendulumDice = 4;
+	repeated PlayerIntegral playerIntegralList = 5;
+}
+/// <summary>
+/// 网关服务器响应摆牌掷骰子
+message RecvMahjongMidwayPendulumDice_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvMahjongMidwayPendulumDice];
+	optional int32 index = 2;
+	optional int32 pendulumDice = 3;
+	repeated PlayerIntegral playerIntegralList = 4;
+}
+//////////////////////////////////////////////////////////
+/// <summary>
+/// 逻辑服务器请求房间信息
+message RequestMahjongHouseInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestMahjongHouseInfo];
+	optional int32 logicId = 2;
+}
+/// <summary>
+/// DB服务器响应房间信息
+message ReplyMahjongHouseInfo_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyMahjongHouseInfo];
+	optional bytes house = 2;
+}
+/// <summary>
+/// 逻辑服务器请求房间玩家信息和牌局信息
+message RequestMahjongPlayerAndBureau_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestMahjongPlayerAndBureau];
+	optional uint64 houseId = 2;
+}
+/// <summary>
+/// DB服务器响应房间玩家和牌局信息
+message ReplyMahjongPlayerAndBureau_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyMahjongPlayerAndBureau];
+	optional uint64 houseId = 2;
+    optional bytes housePlayerBureau = 3;
+}
+/// <summary>
+/// 逻辑服务器请求保存新麻将房间信息
+message RequestSaveCreateMahjongInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveCreateMahjongInfo];
+	optional uint64 houseId = 2;
+    optional int32 houseCardId = 3;
+    optional int32 maxBureau = 4;
+    optional int32 maxPlayerNum = 5;
+	optional int32 businessId = 6;
+	optional int32 housePropertyType = 7;
+    optional int32 catchBird = 8;
+    optional HouseType houseType = 9;
+    optional MahjongType mahjongType = 10;
+    optional string createTime = 11;
+    optional uint64 summonerId = 12;
+    optional int32 index = 13;
+    optional int32 allIntegral = 14;
+    optional int32 logicId = 15;
+	optional int32 flutter = 16;
+}
+/// <summary>
+/// 逻辑服务器请求保存新麻将玩家信息
+message RequestSaveMahjongNewPlayer_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveMahjongNewPlayer];
+	optional uint64 houseId = 2;
+    optional uint64 summonerId = 3;
+    optional int32 index = 4;
+    optional int32 allIntegral = 5;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间删除玩家
+message RequestDelMahjongHousePlayer_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestDelMahjongHousePlayer];
+	optional uint64 houseId = 2;
+    optional uint64 summonerId = 3;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间状态
+message RequestSaveMahjongHouseStatus_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveMahjongHouseStatus];
+	optional uint64 houseId = 2;
+    optional MahjongHouseStatus houseStatus = 3;
+//  optional int32 currentBureau = 4;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间当局信息
+message RequestSaveMahjongBureauInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveMahjongBureauInfo];
+	optional uint64 houseId = 2;    
+    optional uint64 currentBureau = 3;   
+    repeated int32 playerIndexList = 6;
+    optional string bureauTime = 5;  
+	optional bytes playerInitTile = 4;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间玩家结算信息
+message RequestSaveMahjongPlayerSettlement_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveMahjongPlayerSettlement];
+	optional uint64 houseId = 2;
+    optional uint64 summonerId = 3;
+	optional int32 bigWinMyself = 4;
+    optional int32 smallWinMyself = 5;
+    optional int32 bigWinFangBlast = 6;
+    optional int32 smallWinFangBlast = 7;
+    optional int32 bigWinJieBlast = 8;
+    optional int32 smallWinJieBlast = 9;
+    optional int32 allIntegral = 10;
+	optional ZhuangLeisureType zhuangLeisureType = 11;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间当局积分
+message RequestSaveMahjongBureauIntegral_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveMahjongBureauIntegral];
+	optional uint64 houseId = 2;
+    optional uint64 bureau = 3;
+	repeated MahjongPlayerBureau playerBureauList = 4;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间回放步骤
+message RequestSaveMahjongRecord_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveMahjongRecord];
+	optional uint64 houseId = 2;
+    optional uint64 currentBureau = 3;
+    optional MahjongRecordNode mahjongRecordNode = 4;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间解散时同步信息
+message RequestSaveDissolveMahjongInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveDissolveMahjongInfo];
+	optional uint64 houseId = 2;
+    optional uint64 currentBureau = 3;
+	repeated MahjongPlayerBureau playerBureauList = 4;
+	repeated PlayerIntegral playerIntegralList = 5;
+}

@@ -1,0 +1,635 @@
+//每个功能模块对应一个proto文件，以下两行每个proto文件都在开头要照抄
+import public "MsgBase.proto";
+import public "Common.proto";
+package LegendProtocol; 
+
+enum TransmitPlayerType
+{
+	ETP_None = 0;					//None
+	ETP_JoinHouse = 1;				//加入房间
+	ETP_CreateCompetition = 2;      //创建竞技赛
+	ETP_JoinMarket = 3;				//加入比赛场（包括竞技赛）
+	ETP_MarketCompetition = 4;		//商家比赛场信息
+}
+
+//本功能具体消息的定义，列举了本游戏里能用的类型,关于整型，如果是带负号的则采用s开头的int32类型效率要更快
+//MsgID成员要放在第一个定义，成员一律设置为optional，注意每个成员的标号不要冲突
+
+/// <summary>
+/// 玩家向网关服务器请求上线英雄
+message RequestOnline_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestOnline];
+    optional string userId = 2;
+    optional string accessToken = 3;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求上线英雄给逻辑服务器
+message RequestOnline_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestOnline];
+    optional string userId = 2;
+    optional int32 acServerId = 3;
+    optional string ip = 4;
+}
+/// <summary>
+/// 逻辑服务器往DB服务器请求召唤师数据
+message RequestSummonerData_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSummonerData];
+    optional string userId = 2;
+    optional int32 proxyServerId = 3;
+    optional int32 acServerId = 4;
+    optional string ip = 5;
+}
+/// <summary>
+/// DB回复逻辑服务器的召唤师数据请求
+message ReplySummonerData_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplySummonerData];
+    optional ResultCode result = 2;
+    optional uint64 id = 3;
+    optional string userId = 4;
+    optional string nickName = 5;
+    optional UserAuthority auth = 6;
+    optional int32 proxyServerId = 7;
+    optional int32 acServerId = 8;
+    optional int32 allIntegral = 9;
+    optional uint64 houseId = 10;
+    optional UserSex sex = 11;
+    optional uint64 belong = 12;
+    optional string ip = 13;
+    optional bool bFirstLogin = 14;
+    optional string dailySharingTime = 15;
+    optional bool bOpenHouse = 16;
+	repeated RecordBusinessNode recordBusinessList = 17;
+	repeated TicketsNode ticketsList = 18;
+    optional int32 competitionKey = 19;
+    optional int32 roomCard = 20;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器关于玩家的上线英雄请求
+message ReplyOnline_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyOnline];
+    optional ResultCode result = 2;
+    optional string loginTime = 3;
+    optional uint64 summonerId = 4;
+    optional int32 roomCard = 5;
+    optional uint64 houseId = 6;
+    optional string ip = 7;
+    optional string md5Announcement = 8;
+    optional int32 allIntegral = 9;
+    optional bool bFirstLogin = 10;
+    optional bool bDailySharing = 11;
+    optional uint64 bindCode = 12;
+    optional int32 competitionKey = 13;
+    optional string userId = 14;
+}
+/// <summary>
+/// 网关服务器响应玩家的上线请求英雄
+message ReplyOnline_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyOnline];
+    optional ResultCode result = 2;
+    optional string loginTime = 3;
+    optional uint64 summonerId = 4;
+    optional int32 roomCard = 5;
+    optional uint64 houseId = 6;
+    optional string ip = 7;
+    optional string md5Announcement = 8;
+    optional int32 allIntegral = 9;
+    optional bool bFirstLogin = 10;
+    optional bool bDailySharing = 11;
+    optional uint64 bindCode = 12;
+    optional int32 competitionKey = 13;
+}
+
+/// <summary>
+/// 代理服务器向逻辑服务器转发玩家的登出请求
+message RequestLogout_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestLogout];
+    optional string userId = 2;
+    optional bool byPlaceOtherLogin = 3;
+}
+
+/// <summary>
+/// 世界服务器踢除玩家
+message KickLogout_W2P
+{
+	optional MsgID msgId = 1 [default = W2P_KickOut];
+    optional string userId = 2;
+    optional int32 logicServerId = 3;
+    optional bool isPlaceOtherLogin = 4;
+}
+
+/// 玩家往网关服务器发送信息反馈   
+message SendFeedback_T2P {
+	optional MsgID msgId	= 1 [default = T2P_SendFeedback];
+    optional string phoneNumber = 2;
+    optional string feedback = 3;
+}
+
+/// 网关服务器转发玩家信息反馈给逻辑服务器    
+message SendFeedback_P2L {
+	optional MsgID msgId	= 1 [default = P2L_SendFeedback];
+    optional uint64 requesterId = 2;
+    optional string phoneNumber = 3;
+    optional string feedback = 4;
+}
+
+/// 请求数据库服务器发送信息反馈    
+message SendFeedback_L2D {
+	optional MsgID msgId	= 1 [default = L2D_SendFeedback];
+    optional uint64 id = 2;
+    optional string phoneNumber = 3;
+    optional string feedback = 4;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间ID
+message RequestSaveHouseId_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveHouseId];
+    optional string userId = 2;
+	optional uint64 houseId = 3;
+}
+/// <summary>
+/// 逻辑服务器请求保存房卡
+message RequestSaveHouseCard_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveHouseCard];
+    optional uint64 guid = 2;
+	optional int32 houseCard = 3;
+	optional OperationType type = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器结算房卡
+message RecvPlayerHouseCard_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvPlayerHouseCard];
+    optional uint64 summonerId = 2;
+	optional int32 houseCard = 3;
+}
+/// <summary>
+/// 网关服务器响应结算房卡
+message RecvPlayerHouseCard_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvPlayerHouseCard];
+	optional int32 houseCard = 2;
+}
+
+/// <summary>
+/// 逻辑服务器请求保存玩家总积分并清除房间号
+message RequestSavePlayerAllIntegral_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSavePlayerAllIntegral];
+    optional string userId = 2;
+	optional int32 addIntegral = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求领取每日分享奖励
+message RequestGetDailySharing_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestGetDailySharing];
+}
+/// <summary>
+/// 网关服务器转发玩家向逻辑服务器请求领取每日分享奖励
+message RequestGetDailySharing_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestGetDailySharing];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器领取每日分享奖励
+message ReplyGetDailySharing_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyGetDailySharing];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional int32 houseCard = 4;
+}
+/// <summary>
+/// 网关服务器响应领取每日分享奖励
+message ReplyGetDailySharing_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyGetDailySharing];
+    optional ResultCode result = 2;
+	optional int32 houseCard = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求聊天
+message RequestSendChat_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestSendChat];
+    optional ChatType chatType = 2;
+    optional string chatText = 3;
+    optional float chatTime = 4;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求聊天
+message RequestSendChat_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestSendChat];
+    optional uint64 summonerId = 2;
+    optional ChatType chatType = 3;
+    optional string chatText = 4;
+    optional float chatTime = 5;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器聊天
+message ReplySendChat_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplySendChat];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+    optional ChatType chatType = 4;
+    optional string chatText = 5;
+    optional float chatTime = 6;
+}
+/// <summary>
+/// 网关服务器响应玩家聊天
+message ReplySendChat_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplySendChat];
+    optional ResultCode result = 2;
+    optional ChatType chatType = 3;
+    optional string chatText = 4;
+    optional float chatTime = 5;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家聊天
+message RecvSendChat_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvSendChat];
+    optional uint64 summonerId = 2;
+	optional int32 sendIndex = 3;
+    optional ChatType chatType = 4;
+    optional string chatText = 5;
+    optional float chatTime = 6;
+}
+/// <summary>
+/// 网关服务器响应玩家聊天
+message RecvSendChat_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvSendChat];
+	optional int32 sendIndex = 2;
+    optional ChatType chatType = 3;
+    optional string chatText = 4;
+    optional float chatTime = 5;
+}
+/// <summary>
+/// 玩家向网关服务器请求广播玩家状态
+message RequestPlayerLineType_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestPlayerLineType];
+	optional LineType lineType = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求广播玩家状态
+message RequestPlayerLineType_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestPlayerLineType];
+    optional uint64 summonerId = 2;
+	optional LineType lineType = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家状态
+message RecvPlayerLineType_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvPlayerLineType];
+    optional uint64 summonerId = 2;
+	optional int32 index = 3;
+    optional LineType lineType = 4;
+}
+/// <summary>
+/// 网关服务器响应玩家状态
+message RecvPlayerLineType_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvPlayerLineType];
+	optional int32 index = 2;
+    optional LineType lineType = 3;
+}
+/// <summary>
+/// 逻辑服务器请求保存每日分享
+message RequestSaveDailySharing_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveDailySharing];
+    optional string userId = 2;
+	optional int32 addHouseCard = 3;
+	optional string dailySharingTime = 4;
+}
+/// <summary>
+/// 逻辑服务器请求保存商家统计
+message RequestSaveRecordBusiness_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveRecordBusiness];
+    optional string userId = 2;
+	optional int32 businessId = 3;
+	optional string lastTime = 4;
+}
+/// <summary>
+/// 绑定归属（邀请码）
+message RequestBindBelong_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestBindBelong];
+    optional uint64 bindCode = 2;
+}
+/// <summary>
+/// 绑定归属（邀请码）
+message RequestBindBelong_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestBindBelong];
+    optional uint64 requestSummonerId = 2;
+    optional uint64 bindCode = 3;
+}
+/// <summary>
+/// 绑定归属（邀请码）
+message RequestBindBelong_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestBindBelong];
+    optional uint64 requestSummonerId = 2;
+    optional uint64 bindCode = 3;
+}
+/// <summary>
+/// 绑定归属（邀请码）
+message ReplyBindBelong_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyBindBelong];
+    optional ResultCode result = 2;
+    optional uint64 requestSummonerId = 3;
+    optional uint64 bindCode = 4;
+    optional int32 rewardRoomCard = 5;
+}
+/// <summary>
+/// 绑定归属（邀请码）
+message ReplyBindBelong_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyBindBelong];
+    optional ResultCode result = 2;
+    optional uint64 requestSummonerId = 3;
+    optional uint64 bindCode = 4;
+    optional int32 rewardRoomCard = 5;
+}
+/// <summary>
+/// 绑定归属（邀请码）
+message ReplyBindBelong_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyBindBelong];
+    optional ResultCode result = 2;
+    optional uint64 bindCode = 3;
+    optional int32 rewardRoomCard = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求玩家头像信息
+message RequestPlayerHeadImgUrl_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestPlayerHeadImgUrl];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 请求玩家头像信息
+message RequestPlayerHeadImgUrl_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestPlayerHeadImgUrl];
+    optional uint64 requestSummonerId = 2;
+    optional uint64 summonerId = 3;
+}
+/// <summary>
+/// 请求玩家头像信息
+message RequestPlayerHeadImgUrl_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestPlayerHeadImgUrl];
+    optional uint64 requestSummonerId = 2;
+    optional uint64 summonerId = 3;
+}
+/// <summary>
+/// 回复玩家头像信息
+message ReplyPlayerHeadImgUrl_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyPlayerHeadImgUrl];
+    optional ResultCode result = 2;
+    optional uint64 requestSummonerId = 3;
+    optional uint64 summonerId = 4;
+    optional string headImgUrl = 5;
+}
+/// <summary>
+/// 回复玩家头像信息
+message ReplyPlayerHeadImgUrl_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyPlayerHeadImgUrl];
+    optional ResultCode result = 2;
+    optional uint64 requestSummonerId = 3;
+    optional uint64 summonerId = 4;
+    optional string headImgUrl = 5;
+}
+/// <summary>
+/// 回复玩家头像信息
+message ReplyPlayerHeadImgUrl_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyPlayerHeadImgUrl];
+    optional ResultCode result = 2;
+    optional uint64 summonerId = 3;
+    optional string headImgUrl = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求保存玩家地址经纬度
+message RequestSavePlayerAddress_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestSavePlayerAddress];
+    optional float latitude = 2;
+    optional float longitude = 3;
+}
+/// <summary>
+/// 请求保存玩家地址经纬度
+message RequestSavePlayerAddress_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestSavePlayerAddress];
+    optional uint64 requestSummonerId = 2;
+    optional float latitude = 3;
+    optional float longitude = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求其他玩家地址经纬度
+message RequestOtherPlayerAddress_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestOtherPlayerAddress];
+    optional uint64 playerId = 2;
+}
+/// <summary>
+/// 请求其他玩家地址经纬度
+message RequestOtherPlayerAddress_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestOtherPlayerAddress];
+    optional uint64 requestSummonerId = 2;
+    optional uint64 playerId = 3;
+}
+/// <summary>
+/// 回复其他玩家地址经纬度
+message ReplyOtherPlayerAddress_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyOtherPlayerAddress];
+    optional ResultCode result = 2;
+    optional uint64 requestSummonerId = 3;
+    optional int32 playerIndex = 4;
+    optional float latitude = 5;
+    optional float longitude = 6;
+}
+/// <summary>
+/// 回复其他玩家地址经纬度
+message ReplyOtherPlayerAddress_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyOtherPlayerAddress];
+    optional ResultCode result = 2;
+    optional int32 playerIndex = 3;
+    optional float latitude = 4;
+    optional float longitude = 5;
+}
+/// <summary>
+/// 玩家向网关服务器请求玩家托管操作
+message RequestPlayerOperateHosted_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestPlayerOperateHosted];
+    optional bool bHosted = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向逻辑服务器请求玩家托管操作
+message RequestPlayerOperateHosted_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestPlayerOperateHosted];
+    optional uint64 requestSummonerId = 2;
+    optional bool bHosted = 3;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器玩家托管状态
+message RecvPlayerHostedStatus_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvPlayerHostedStatus];
+    optional uint64 requestSummonerId = 2;
+    optional bool bHosted = 3;
+}
+/// <summary>
+/// 网关服务器下发玩家托管状态
+message RecvPlayerHostedStatus_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvPlayerHostedStatus];
+    optional bool bHosted = 2;
+}
+/// <summary>
+/// DB服务器请求删除僵尸房
+message RequestDelZombieHouse_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_RequestDelZombieHouse];
+    repeated uint64 delHouseIdList = 2;
+}
+/// <summary>
+/// 逻辑服务器请求玩家保存比赛场口令
+message RequestSaveCompetitionKey_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveCompetitionKey];
+    optional uint64 requestSummonerId = 2;
+    optional int32 competitionKey = 3;
+}
+/// <summary>
+/// 逻辑服务器请求玩家清除房间号和比赛场口令
+message RequestInitHouseIdAndComKey_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestInitHouseIdAndComKey];
+    optional uint64 requestSummonerId = 2;
+}
+
+//向世界服务器请求房间的归属服务器
+message RequestHouseBelong_L2W
+{
+	optional MsgID msgId = 1 [default = L2W_RequestHouseBelong];
+	optional uint64 summonerId = 2;
+	optional int32 houseId = 3;
+}
+
+//世界服务器回复房间归属服务器的请求
+message ReplyHouseBelong_W2L
+{
+	optional MsgID msgId = 1 [default = W2L_ReplyHouseBelong];
+	optional uint64 summonerId = 2;
+	optional int32 houseId = 3;
+	optional int32 logicId = 4;
+}
+
+//传送玩家的信息到目标服务器
+message TransmitPlayerInfo_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_TransmitPlayerInfo];
+	optional bytes parameter = 2;
+	optional bytes summoner = 3;
+	optional int32 targetLogic = 4;
+	optional uint64 summonerId = 5;
+	optional TransmitPlayerType type = 6;
+}
+
+//传送玩家的信息到目标服务器
+message TransmitPlayerInfo_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_TransmitPlayerInfo];
+	optional bytes parameter = 2;
+	optional bytes summoner = 3;
+	optional TransmitPlayerType type = 4;
+}
+/// <summary>
+/// 网关服务器响应更新公告
+message NotifyUpdateAnnouncement_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_NotifyUpdateAnnouncement];
+	optional string announcement = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器更新公告
+message RecvUpdateAnnouncement_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvUpdateAnnouncement];
+    optional uint64 summonerId = 2;
+	optional string announcement = 3;
+}
+/// <summary>
+/// 网关服务器响应更新公告
+message RecvUpdateAnnouncement_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvUpdateAnnouncement];
+	optional string announcement = 2;
+}
+/// <summary>
+/// 玩家向网关服务器请求公告信息
+message RequestAnnouncement_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestAnnouncement];
+}
+/// <summary>
+/// 请求公告信息
+message RequestAnnouncement_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestAnnouncement];
+    optional uint64 requestSummonerId = 2;
+}
+/// <summary>
+/// 回复公告信息
+message ReplyAnnouncement_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyAnnouncement];
+    optional ResultCode result = 2;
+    optional uint64 requestSummonerId = 3;
+    optional string announcement = 4;
+}
+/// <summary>
+/// 回复公告信息
+message ReplyAnnouncement_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyAnnouncement];
+    optional ResultCode result = 2;
+    optional string announcement = 3;
+}
+/// <summary>
+/// 逻辑服务器通知清理无用的房间
+message NotifyDBClearHouse_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_NotifyDBClearHouse];
+    optional int32 logicId = 2;
+}

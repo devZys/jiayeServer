@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{73679294-F6DF-48F6-810B-5756DA853747}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LegendServerDB</RootNamespace>
+    <AssemblyName>LegendServerDB</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\PhotonServer\deploy\Build\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;MAHJONG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\PhotonServer\deploy\Build\</OutputPath>
+    <DefineConstants>TRACE;RUNFAST</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\..\PhotonServer\deploy\Build\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;RUNFAST</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>CS1762</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\..\..\PhotonServer\deploy\Build\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ExitGamesLibs">
+      <HintPath>..\..\..\PhotonServer\lib\ExitGamesLibs.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentNHibernate">
+      <HintPath>..\..\..\PhotonServer\lib\FluentNHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="Iesi.Collections">
+      <HintPath>..\..\..\PhotonServer\lib\Iesi.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="LegendProtocol">
+      <HintPath>..\..\..\LegendProtocol\lib\LegendProtocol.dll</HintPath>
+    </Reference>
+    <Reference Include="Msg, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\LegendProtocol\lib\Msg.dll</HintPath>
+    </Reference>
+    <Reference Include="MsgPack">
+      <HintPath>..\..\..\LegendProtocol\lib\MsgPack.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate">
+      <HintPath>..\..\..\PhotonServer\lib\NHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>..\..\..\PhotonServer\lib\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="Photon.SocketServer">
+      <HintPath>..\..\..\PhotonServer\lib\Photon.SocketServer.dll</HintPath>
+    </Reference>
+    <Reference Include="PhotonHostRuntimeInterfaces">
+      <HintPath>..\..\..\PhotonServer\lib\PhotonHostRuntimeInterfaces.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\LegendProtocol\lib\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="RabbitMQ.Client, Version=3.6.2.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\PhotonServer\lib\RabbitMQ.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="RabbitMQ.ServiceModel, Version=3.6.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\PhotonServer\lib\RabbitMQ.ServiceModel.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="zlib.net">
+      <HintPath>..\..\..\LegendProtocol\lib\zlib.net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Core\MQReceiver.cs" />
+    <Compile Include="Core\MQSender.cs" />
+    <Compile Include="Core\ServerCPU.cs" />
+    <Compile Include="Core\ServerInitialize.cs" />
+    <Compile Include="Core\ServerRegister.cs" />
+    <Compile Include="Core\Session.cs" />
+    <Compile Include="Core\SessionManager.cs" />
+    <Compile Include="Database\Base\DBDefine.cs" />
+    <Compile Include="Database\Base\DBManager.cs" />
+    <Compile Include="Database\Base\NHibernateHelper.cs" />
+    <Compile Include="Database\Base\SqlHelper.cs" />
+    <Compile Include="Database\ORM\Config\ServerConfigDB.cs" />
+    <Compile Include="Database\ORM\Config\SpecialActivitiesConfigDB.cs" />
+    <Compile Include="Database\ORM\Config\SystemConfigDB.cs" />
+    <Compile Include="Database\ORM\Config\TicketsConfigDB.cs" />
+    <Compile Include="Database\ORM\Config\WebConfigDB.cs" />
+    <Compile Include="Database\ORM\Distributed\ServerDeployDB.cs" />
+    <Compile Include="Database\ORM\Mahjong\MahjongDB.cs" />
+    <Compile Include="Database\ORM\Record\RecordDB.cs" />
+    <Compile Include="Database\ORM\RunFast\RunFastDB.cs" />
+    <Compile Include="Database\ORM\ServiceBox\DBCacheSyncTestDB.cs" />
+    <Compile Include="Database\ORM\Statistics\ProfilerDB.cs" />
+    <Compile Include="Database\ORM\ServiceBox\ServiceBoxDB.cs" />
+    <Compile Include="Database\ORM\Summoner\SummonerDB.cs" />
+    <Compile Include="Database\ORM\WordPlate\WordPlateDB.cs" />
+    <Compile Include="Define\ServerDefine.cs" />
+    <Compile Include="LocalConfig\LocalConfigManager.cs" />
+    <Compile Include="Main\InboundPeer.cs" />
+    <Compile Include="Main\LegendServerDBApplication.cs" />
+    <Compile Include="Main\OutboundPeer.cs" />
+    <Compile Include="Module\Authority\AuthorityMain.cs" />
+    <Compile Include="Module\Authority\AuthorityMsgProxy.cs" />
+    <Compile Include="Module\Distributed\DBCacheSync.cs" />
+    <Compile Include="Module\Distributed\DistributedMain.cs" />
+    <Compile Include="Module\Distributed\DistributedMsgProxy.cs" />
+    <Compile Include="Module\Login\LoginMain.cs" />
+    <Compile Include="Module\Login\LoginMsgProxy.cs" />
+    <Compile Include="Module\Mahjong\MahjongMain.cs" />
+    <Compile Include="Module\Mahjong\MahjongMsgProxy.cs" />
+    <Compile Include="Module\Record\RecordMain.cs" />
+    <Compile Include="Module\Record\RecordMsgProxy.cs" />
+    <Compile Include="Module\RunFast\RunFastMain.cs" />
+    <Compile Include="Module\RunFast\RunFastMsgProxy.cs" />
+    <Compile Include="Module\ServiceBox\ServiceBoxMain.cs" />
+    <Compile Include="Module\ServiceBox\ServiceBoxMsgProxy.cs" />
+    <Compile Include="Module\Update\UpdateDataHandle.cs" />
+    <Compile Include="Module\Update\UpdateMain.cs" />
+    <Compile Include="Module\Update\UpdateMsgProxy.cs" />
+    <Compile Include="Module\MainCity\MainCityMain.cs" />
+    <Compile Include="Module\MainCity\MainCityMsgProxy.cs" />
+    <Compile Include="Module\WordPlate\WordPlateMain.cs" />
+    <Compile Include="Module\WordPlate\WordPlateMsgProxy.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Core\ServerMsgProxy.cs" />
+    <Compile Include="Util\CodeElapseChecker.cs" />
+    <Compile Include="Util\CommonFunc.cs" />
+    <Compile Include="Util\RSA.cs" />
+    <Compile Include="Util\SystemInfo.cs" />
+    <Compile Include="Util\TimerManager.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

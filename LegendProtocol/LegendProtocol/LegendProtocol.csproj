@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DE1D4BBF-A0F5-47C5-9B00-2C0E90F89B68}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LegendProtocol</RootNamespace>
+    <AssemblyName>LegendProtocol</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\lib\</OutputPath>
+    <DefineConstants>DEBUG;WORDPLATE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\lib\</OutputPath>
+    <DefineConstants>TRACE;RUNFAST</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\lib\</OutputPath>
+    <DefineConstants>DEBUG;RUNFAST</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\lib\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Msg, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Msg.dll</HintPath>
+    </Reference>
+    <Reference Include="MsgSerializer, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\MsgSerializer.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="zlib.net">
+      <HintPath>..\lib\zlib.net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Define\RunFastDefine.cs" />
+    <Compile Include="Define\MahjongDefine.cs" />
+    <Compile Include="Define\ServerDefine.cs" />
+    <Compile Include="Util\WordPlate\WhzWordPlateStrategy.cs" />
+    <Compile Include="Util\WordPlate\WordPlateManager.cs" />
+    <Compile Include="Util\WordPlate\WordPlateStrategyBase.cs" />
+    <Compile Include="Util\WordPlate\WordPlateTile.cs" />
+    <None Include="Msg\Msg.cs" />
+    <Compile Include="Define\WordPlateDefine.cs" />
+    <Compile Include="Msg\MQDefine.cs" />
+    <Compile Include="Util\Mahjong\CSMahjongStrategy.cs" />
+    <Compile Include="Util\Mahjong\MahjongManager.cs" />
+    <Compile Include="Util\Mahjong\MahjongStrategyBase.cs" />
+    <Compile Include="Util\Mahjong\MahjongTile.cs" />
+    <Compile Include="Util\Mahjong\RedMahjongStrategy.cs" />
+    <Compile Include="Util\Mahjong\ZZMahjongStrategy.cs" />
+    <Compile Include="Util\MyRandom.cs" />
+    <Compile Include="Util\Deck\RunFastDeck.cs" />
+    <Compile Include="Util\Deck\Deck.cs" />
+    <Compile Include="Util\CommonFunc.cs" />
+    <Compile Include="Util\ModuleManager.cs" />
+    <Compile Include="Msg\MsgFactory.cs" />
+    <Compile Include="Define\CommonDefine.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Msg\Proto\Mahjong.proto" />
+    <None Include="Msg\Proto\UIDAlloc.proto" />
+    <None Include="Msg\Proto\RunFast.proto" />
+    <None Include="Msg\Proto\SpecialActivities.proto" />
+    <None Include="Msg\Proto\MainCity.proto" />
+    <None Include="Msg\Proto\Lobby.proto" />
+    <None Include="Msg\Proto\WordPlate.proto" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Msg\Proto\Common.proto" />
+    <None Include="Msg\Proto\Login.proto" />
+    <None Include="Msg\Proto\ServiceBox.proto" />
+    <None Include="Msg\Proto\SafeCheck.proto" />
+    <None Include="Msg\Proto\Record.proto" />
+    <None Include="Msg\Proto\Distributed.proto" />
+    <None Include="Msg\Proto\Demo.proto" />
+    <None Include="Msg\Proto\MsgBase.proto" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>del ..\..\LegendClient\Mahjong\Assets\Plugins\LegendProtocol.dll /f /q
+del ..\..\LegendClient\RunFast\Assets\Plugins\LegendProtocol.dll /f /q
+del ..\..\LegendClient\YiYangWordPlate\Assets\Plugins\LegendProtocol.dll /f /q
+del ..\..\LegendClient\XingShaMahjong\Assets\Plugins\LegendProtocol.dll /f /q
+del ..\..\LegendServer\Common\Lib\LegendProtocol.dll /f /q
+del ..\..\LegendServer\AssistantServices\LegendServerBox\bin\LegendProtocol.dll /f /q
+del ..\..\LegendServer\AssistantServices\WebSystem\CustomerSystem\bin\LegendProtocol.dll /f /q
+del ..\..\LegendServer\AssistantServices\WebSystem\GameData\bin\LegendProtocol.dll /f /q
+del ..\..\LegendServer\AssistantServices\WebSystem\ListServer\bin\LegendProtocol.dll /f /q
+del ..\..\LegendServer\AssistantServices\WebSystem\MobileTableGameGM\bin\LegendProtocol.dll /f /q
+del ..\..\PhotonServer\deploy\Build\LegendProtocol.dll /f /q
+del ..\..\LegendServer\LegendServerWeb\LegendServerWeb\bin\LegendProtocol.dll /f /q
+
+xcopy LegendProtocol.dll ..\..\LegendClient\Mahjong\Assets\Plugins\ /s /e /h
+xcopy LegendProtocol.dll ..\..\LegendClient\RunFast\Assets\Plugins\ /s /e /h
+xcopy LegendProtocol.dll ..\..\LegendClient\YiYangWordPlate\Assets\Plugins\ /s /e /h
+xcopy LegendProtocol.dll ..\..\LegendClient\XingShaMahjong\Assets\Plugins\ /s /e /h
+xcopy LegendProtocol.dll ..\..\LegendServer\Common\Lib\ /s /e /h
+xcopy LegendProtocol.dll ..\..\LegendServer\AssistantServices\LegendServerBox\bin\ /s /e /h
+xcopy LegendProtocol.dll ..\..\LegendServer\AssistantServices\WebSystem\CustomerSystem\bin\ /s /e /h
+xcopy LegendProtocol.dll ..\..\LegendServer\AssistantServices\WebSystem\GameData\bin\ /s /e /h
+xcopy LegendProtocol.dll ..\..\LegendServer\AssistantServices\WebSystem\ListServer\bin\ /s /e /h
+xcopy LegendProtocol.dll ..\..\LegendServer\AssistantServices\WebSystem\MobileTableGameGM\bin\ /s /e /h
+xcopy LegendProtocol.dll ..\..\PhotonServer\deploy\Build\ /s /e /h
+xcopy LegendProtocol.dll ..\..\LegendServer\LegendServerWeb\LegendServerWeb\bin\ /s /e /h</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

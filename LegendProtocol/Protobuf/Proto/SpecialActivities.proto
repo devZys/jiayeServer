@@ -1,0 +1,544 @@
+//活动专场系统
+import public "MsgBase.proto";
+import public "Common.proto";
+package LegendProtocol; 
+
+enum MarketKeyType
+{
+	EMK_None = 0;        //None
+	EMK_Ordinary = 1;        //普通匹配
+	EMK_Competition = 2;        //竞技赛
+}
+
+enum CompPlayerStatus
+{
+	ECPS_None = 0;    //空
+    ECPS_Apply = 1;   //报名
+    ECPS_Game = 2;    //游戏中
+    ECPS_Wait = 3;    //等待中
+    ECPS_Over = 4;    //淘汰
+}
+
+//商场比赛场信息
+message MarketComNode
+{
+	optional int32 competitionKey		= 1;	//比赛场口令 
+	optional int32 joinPalyerNum		= 2;	//已经加入人数
+	optional int32 maxApplyNum			= 3;	//最大申请人数
+	optional int32 firstAdmitNum		= 4;	//第一次晋级人数
+	optional string createTime			= 5;	//创建时间	
+}
+
+//比赛场玩家信息
+message ComPlayerNode
+{
+	optional string nickName				 = 1;		//昵称
+	optional uint64 summonerId				 = 2;		//玩家Id
+	optional CompPlayerStatus playerStatus	 = 3;		//玩家状态
+	optional int32 rank						 = 4;		//玩家名次
+}
+
+//创建比赛场信息
+message CreateCompetitionNode
+{
+	optional int32 marketId 			= 1; 
+	optional int32 competitionKey		= 2;  
+	optional int32 maxGameBureau		= 3; 
+	optional int32 maxApplyNum			= 4; 
+	optional int32 firstAdmitNum		= 5; 
+}
+
+//加入比赛信息
+message JoinMarketNode
+{
+	optional int32 marketId 			= 1; 
+	optional int32 competitionKey		= 2;
+	optional MarketKeyType keyType		= 3;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//	msg协议结构
+/////////////////////////////////////////////////////////////////////////
+//请求商场口令
+message RequestMarketKey_X2P { 
+	optional MsgID msgId 	= 1 [default = X2P_RequestMarketKey];
+	optional int32 marketId	= 2;  
+	optional bool build		= 3;
+}
+
+//请求商场口令
+message RequestMarketKey_P2W { 
+	optional MsgID msgId 				= 1 [default = P2W_RequestMarketKey];
+	optional int32 marketId 			= 2;  
+	optional int32 requesterPeerId		= 3;  
+	optional uint64 requesterSummonerId	= 4; 
+	optional bool build					= 5;
+}
+
+//回复商场口令
+message ReplyMarketKey_W2P { 
+	optional MsgID msgId 			= 1 [default = W2P_ReplyMarketKey];
+	optional ResultCode result		= 2;  
+	optional int32 requesterPeerId	= 3;  
+	optional int32 key	 			= 4;  
+	optional int32 marketId 		= 5; 
+}
+
+//回复商场口令
+message ReplyMarketKey_P2X { 
+	optional MsgID msgId 		= 1 [default = P2X_ReplyMarketKey];
+	optional ResultCode result	= 2; 
+	optional int32 key 			= 3; 
+	optional int32 marketId 	= 4;  
+}
+
+//请求加入商场
+message RequestJoinMarket_X2P { 
+	optional MsgID msgId 	= 1 [default = X2P_RequestJoinMarket];
+	optional int32 marketId	= 2;  
+	optional int32 key		= 3;  
+}
+
+//请求加入商场
+message RequestJoinMarket_P2W { 
+	optional MsgID msgId 				= 1 [default = P2W_RequestJoinMarket];
+	optional int32 key					= 2;  
+	optional uint64 requesterSummonerId	= 3; 
+	optional int32 requesterPeerId		= 4; 
+}
+
+//回复加入商场
+message ReplyJoinMarket_W2P { 
+	optional MsgID msgId 				= 1 [default = W2P_ReplyJoinMarket];
+	optional ResultCode result			= 2;   
+	optional int32 requesterPeerId		= 3; 
+}
+
+//回复加入商场
+message ReplyJoinMarket_P2X { 
+	optional MsgID msgId 				= 1 [default = P2X_ReplyJoinMarket];
+	optional ResultCode result			= 2;   
+}
+
+//通知逻辑服务器有玩家通过口令加入商场
+message NotifyJoinMarket_W2L { 
+	optional MsgID msgId 					= 1 [default = W2L_NotifyJoinMarket]; 
+	optional uint64 requesterSummonerId		= 2; 
+	optional JoinMarketNode joinMarketNode	= 3;  
+	optional int32 logicId					= 4;
+}
+//回复加入商场比赛场
+message ReplyJoinMarketCompetition_L2P { 
+	optional MsgID msgId 				= 1 [default = L2P_ReplyJoinMarketCompetition];
+	optional ResultCode result			= 2;   
+	optional uint64 summonerId			= 3;   
+	optional int32 joinPalyerNum		= 4;
+	optional int32 maxApplyNum			= 5;
+}
+
+//回复加入商场比赛场
+message ReplyJoinMarketCompetition_P2T { 
+	optional MsgID msgId 				= 1 [default = P2T_ReplyJoinMarketCompetition];
+	optional ResultCode result			= 2;  
+	optional int32 joinPalyerNum		= 3;
+	optional int32 maxApplyNum			= 4;
+}
+//请求商场版本号
+message RequestMarketVersion_X2P { 
+	optional MsgID msgId 	= 1 [default = X2P_RequestMarketVersion];
+}
+//回复商场版本号
+message ReplyMarketVersion_P2X { 
+	optional MsgID msgId 			= 1 [default = P2X_ReplyMarketVersion];
+	optional int32 version			= 2;   
+}
+/// <summary>
+/// 玩家向网关服务器请求优惠券信息
+message RequestTicketsInfo_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestTicketsInfo];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求优惠券信息
+message RequestTicketsInfo_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestTicketsInfo];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器优惠券信息
+message ReplyTicketsInfo_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyTicketsInfo];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	repeated TicketsNode ticketsList = 4;
+	repeated uint64 delTicketsIdList = 5;
+}
+/// <summary>
+/// 网关服务器响应优惠券信息
+message ReplyTicketsInfo_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyTicketsInfo];
+    optional ResultCode result = 2;
+	repeated TicketsNode ticketsList = 3;
+	repeated uint64 delTicketsIdList = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求使用优惠券
+message RequestUseTickets_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestUseTickets];
+	optional uint64 ticketsOnlyId = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求使用优惠券
+message RequestUseTickets_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestUseTickets];
+    optional uint64 summonerId = 2;
+	optional uint64 ticketsOnlyId = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器使用优惠券
+message ReplyUseTickets_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyUseTickets];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 ticketsOnlyId = 4;
+}
+/// <summary>
+/// 网关服务器响应使用优惠券
+message ReplyUseTickets_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyUseTickets];
+    optional ResultCode result = 2;
+	optional uint64 ticketsOnlyId = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求退出比赛场
+message RequestQuitMarketCompetition_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestQuitMarketCompetition];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求退出比赛场
+message RequestQuitMarketCompetition_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestQuitMarketCompetition];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器退出比赛场
+message ReplyQuitMarketCompetition_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyQuitMarketCompetition];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+}
+/// <summary>
+/// 网关服务器响应退出比赛场
+message ReplyQuitMarketCompetition_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyQuitMarketCompetition];
+    optional ResultCode result = 2;
+}
+/// <summary>
+/// 逻辑服务器请求清除比赛场口令
+message RequestInitCompetitionKey_L2W
+{
+	optional MsgID msgId = 1 [default = L2W_RequestInitCompetitionKey];
+	repeated int32 competitionKeyList = 2;
+}
+//玩家向网关服务器请求创建比赛场
+message RequestCreateMarketCompetition_T2P { 
+	optional MsgID msgId				= 1 [default = T2P_RequestCreateMarketCompetition];
+	optional int32 marketId				= 2;  
+	optional int32 maxGameBureau		= 3; 
+	optional int32 maxApplyNum			= 4; 
+	optional int32 firstAdmitNum		= 5;
+}
+
+//网关服务器转发玩家向世界服务器请求创建比赛场
+message RequestCreateMarketCompetition_P2W { 
+	optional MsgID msgId 				= 1 [default = P2W_RequestCreateMarketCompetition]; 
+	optional uint64 requesterSummonerId	= 2; 
+	optional int32 marketId 			= 3;   
+	optional int32 maxGameBureau		= 4; 
+	optional int32 maxApplyNum			= 5; 
+	optional int32 firstAdmitNum		= 6; 
+}
+//世界服务器转发玩家向逻辑服务器请求创建比赛场
+message RequestCreateMarketCompetition_W2L { 
+	optional MsgID msgId 				= 1 [default = W2L_RequestCreateMarketCompetition]; 
+	optional uint64 requesterSummonerId	= 2; 
+	optional CreateCompetitionNode node	= 3;  
+	optional int32 logicId				= 4; 
+}
+//逻辑服务器回复世界服务器创建比赛场
+message ReplyCreateMarketCompetition_L2W { 
+	optional MsgID msgId 				= 1 [default = L2W_ReplyCreateMarketCompetition];
+	optional ResultCode result			= 2;   
+	optional uint64 requesterSummonerId	= 3;
+	optional int32 marketId 			= 4;   
+	optional int32 maxGameBureau		= 5; 
+	optional int32 maxApplyNum			= 6; 
+	optional int32 firstAdmitNum		= 7; 
+	optional int32 competitionKey		= 8; 
+	optional string createTime			= 9;
+	optional int32 logicId				= 10; 
+}
+//世界服务器回复网关服务器创建比赛场
+message ReplyCreateMarketCompetition_W2P { 
+	optional MsgID msgId 				= 1 [default = W2P_ReplyCreateMarketCompetition];
+	optional ResultCode result			= 2;   
+	optional uint64 requesterSummonerId	= 3;
+	optional int32 marketId 			= 4;   
+	optional int32 maxGameBureau		= 5; 
+	optional int32 maxApplyNum			= 6; 
+	optional int32 firstAdmitNum		= 7; 
+	optional int32 competitionKey		= 8; 
+	optional string createTime			= 9;
+}
+//世界服务器回复网关服务器创建比赛场
+message ReplyCreateMarketCompetition_P2T { 
+	optional MsgID msgId 				= 1 [default = P2T_ReplyCreateMarketCompetition];
+	optional ResultCode result			= 2; 
+	optional int32 marketId 			= 3;   
+	optional int32 maxGameBureau		= 4; 
+	optional int32 maxApplyNum			= 5; 
+	optional int32 firstAdmitNum		= 6; 
+	optional int32 competitionKey		= 7;
+	optional string createTime			= 8;
+}
+/// <summary>
+/// 玩家向网关服务器请求商场比赛场信息
+message RequestMarketCompetitionInfo_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestMarketCompetitionInfo];
+	optional int32 marketId 	= 2;  
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求商场比赛场信息
+message RequestMarketCompetitionInfo_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestMarketCompetitionInfo];
+    optional uint64 summonerId	= 2;
+	optional int32 marketId		= 3;  
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器商场比赛场信息
+message ReplyMarketCompetitionInfo_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyMarketCompetitionInfo];
+    optional uint64 summonerId				 = 2;
+    optional ResultCode result				 = 3;	
+	optional int32 marketId					 = 4;
+	optional bytes marketCompetition		 = 5;	
+}
+/// <summary>
+/// 网关服务器响应商场比赛场信息
+message ReplyMarketCompetitionInfo_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyMarketCompetitionInfo];
+    optional ResultCode result				 = 2;
+	optional int32 marketId					 = 3;
+	optional bytes marketCompetition		 = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求商场比赛场玩家信息
+message RequestCompetitionPlayerInfo_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestCompetitionPlayerInfo];
+	optional int32 competitionKey 	= 2;  
+	optional int32 page			 	= 3;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求商场比赛场玩家信息
+message RequestCompetitionPlayerInfo_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestCompetitionPlayerInfo];
+    optional uint64 summonerId		= 2;
+	optional int32 competitionKey	= 3;  
+	optional int32 page			 	= 4; 
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器商场比赛场玩家信息
+message ReplyCompetitionPlayerInfo_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyCompetitionPlayerInfo];
+    optional uint64 summonerId				 = 2;
+    optional ResultCode result				 = 3;	
+	optional int32 competitionKey			 = 4;	
+	optional int32 page						 = 5;  
+	optional bytes competitionPlayer		 = 6;
+	optional int32 joinPalyerNum			 = 7;
+}
+/// <summary>
+/// 网关服务器响应商场比赛场玩家信息
+message ReplyCompetitionPlayerInfo_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyCompetitionPlayerInfo];
+    optional ResultCode result				 = 2;
+	optional int32 competitionKey			 = 3;
+	optional int32 page				   	 	 = 4; 
+	optional bytes competitionPlayer		 = 5;
+	optional int32 joinPalyerNum			 = 6;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器玩家名次
+message RecvCompetitionPlayerRank_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvCompetitionPlayerRank];
+    optional uint64 summonerId		 = 2;	
+	optional int32 rank				 = 3;	
+	optional int32 admitNum			 = 4;  
+	optional int32 houseCount		 = 5;
+	optional bool bOnline			 = 6;
+}
+/// <summary>
+/// 网关服务器下发玩家名次
+message RecvCompetitionPlayerRank_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvCompetitionPlayerRank];
+	optional int32 rank				 = 2;	
+	optional int32 admitNum			 = 3;  
+	optional int32 houseCount		 = 4;
+	optional bool bOnline			 = 5;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器玩家结束名次
+message RecvCompetitionPlayerOverRank_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvCompetitionPlayerOverRank];
+    optional uint64 summonerId		 = 2;	
+	optional int32 rank				 = 3;	
+	optional TicketsNode ticketsNode = 4;
+}
+/// <summary>
+/// 网关服务器下发玩家结束名次
+message RecvCompetitionPlayerOverRank_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvCompetitionPlayerOverRank];
+	optional int32 rank				 = 2;	
+	optional TicketsNode ticketsNode = 3;
+}
+/// <summary>
+/// 网关服务器响应商场比赛场玩家人数信息
+message RequestCompetitionPlayerOnline_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestCompetitionPlayerOnline];
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器玩家人数信息
+message RequestCompetitionPlayerOnline_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestCompetitionPlayerOnline];
+    optional uint64 summonerId		 = 2;	
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器玩家人数信息
+message RecvCompetitionPlayerApplyNum_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvCompetitionPlayerApplyNum];
+    optional uint64 summonerId		 = 2;
+	optional int32 joinPalyerNum 	 = 3;
+	optional int32 maxApplyNum		 = 4;
+}
+/// <summary>
+/// 网关服务器下发玩家人数信息
+message RecvCompetitionPlayerApplyNum_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvCompetitionPlayerApplyNum];
+	optional int32 joinPalyerNum	 = 2;
+	optional int32 maxApplyNum		 = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求删除商场比赛场
+message RequestDelMarketCompetition_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestDelMarketCompetition];
+	optional int32 competitionKey 	= 2;  
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求删除商场比赛场
+message RequestDelMarketCompetition_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestDelMarketCompetition];
+    optional uint64 summonerId		= 2;
+	optional int32 competitionKey	= 3;  
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器删除商场比赛场
+message ReplyDelMarketCompetition_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyDelMarketCompetition];
+    optional uint64 summonerId				 = 2;
+    optional ResultCode result				 = 3;	
+	optional int32 competitionKey			 = 4;	
+}
+/// <summary>
+/// 网关服务器响应删除商场比赛场
+message ReplyDelMarketCompetition_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyDelMarketCompetition];
+    optional ResultCode result				 = 2;
+	optional int32 competitionKey			 = 3;
+}
+//向世界服务器请求商场比赛场的归属服务器
+message RequestMarketCompetitionBelong_L2W
+{
+	optional MsgID msgId = 1 [default = L2W_RequestMarketCompetitionBelong];
+	optional uint64 summonerId = 2;
+	optional int32 marketId = 3;
+}
+
+//世界服务器回复商场比赛场归属服务器的请求
+message ReplyMarketCompetitionBelong_W2L
+{
+	optional MsgID msgId = 1 [default = W2L_ReplyMarketCompetitionBelong];
+	optional uint64 summonerId = 2;
+	optional int32 marketId = 3;
+	optional int32 logicId = 4;
+}
+///////////////////////////////////////////////////////////////////
+/// <summary>
+/// 逻辑服务器请求保存优惠券
+message RequestSaveTickets_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveTickets];
+    optional uint64 summonerId = 2;
+	optional TicketsNode ticketsNode = 3;
+}
+/// <summary>
+/// 逻辑服务器请求删除优惠券
+message RequestDelTickets_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestDelTickets];
+    optional string userId = 2;
+	repeated uint64 ticketsOnlyIdList = 3;
+}
+/// <summary>
+/// 逻辑服务器请求使用优惠券
+message RequestUseTickets_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestUseTickets];
+    optional string userId = 2;
+	optional uint64 ticketsOnlyId = 3;
+}
+/// <summary>
+/// 世界服通知DB服更新比赛场信息
+message NotifyCreateCompetition_W2D
+{
+	optional MsgID msgId = 1 [default = W2D_NotifyCreateCompetition];
+    optional int32 competitionKey = 2;
+	optional int32 logicId = 3;
+}
+/// <summary>
+/// 世界服通知DB服删除比赛场信息
+message NotifyDelCompetition_W2D
+{
+	optional MsgID msgId = 1 [default = W2D_NotifyDelCompetition];
+    repeated int32 competitionKeyList = 2;
+}

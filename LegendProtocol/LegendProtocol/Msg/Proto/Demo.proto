@@ -1,0 +1,58 @@
+//每个功能模块对应一个proto文件，以下两行每个proto文件都在开头要照抄
+import public "MsgBase.proto";
+package LegendProtocol; 
+
+//本功能模块的消息成员里需要定义一些类或者枚举可以这里以下定义
+//如果是引用自别的模块里的则要在本文件头把目标包含文件import进来
+message TestObj1 {
+	optional int32 key 		= 1;
+	optional string value = 2;
+} 
+
+message TestObj2 {
+	optional int32 key 		= 1;
+	optional string value = 2;
+} 
+  
+//本功能具体消息的定义，列举了本游戏里能用的类型,关于整型，如果是带负号的则采用s开头的int类型效率要更快
+//MsgID成员要放在第一个定义，成员一律设置为optional，注意每个成员的标号不要冲突
+
+message DemoMsg { 
+		optional MsgID msgId 					= 1 [default = X2P_LongHeartBeat];
+		optional double a 						= 2;  
+    optional float 	b 						= 3;  
+    optional int32 c 							= 4;
+    optional int64 d 							= 5;
+    optional uint32 e 						= 6;
+    optional uint64 f 						= 7;
+    optional sint32 g 						= 8;
+    optional sint64 h 						= 9;
+    optional bool i 							= 10;
+    optional string j 						= 11;
+    optional bytes k 							= 12;
+    optional TestObj1 l						= 13;  
+    repeated TestObj2 m						= 14;    
+}
+
+// 在业务代码模块里：
+// 序列化：
+
+// DemoMsg proto = new DemoMsg()
+// proto.a = 1.0;
+// proto.b = 2.0f;
+// proto.c = -3;
+// proto.d = -4;
+// proto.e = 5;
+// proto.f = 6;
+// proto.g = -7;
+// proto.h = -8;
+// proto.i = false;
+// proto.j = "string";
+// proto.k = new byte[]{ 9, 10, 11};
+// proto.l = new TestObj1() { key = 12, value = "13" };
+// TestObj2 obj1 = new TestObj2();
+// obj1.key = 14; obj1.value = "15";
+// TestObj2 obj2 = new TestObj2();
+// obj2.key = 16; obj2.value = "17";
+// proto.m.Add(obj1);
+// proto.m.Add(obj2);

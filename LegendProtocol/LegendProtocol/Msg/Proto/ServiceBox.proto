@@ -1,0 +1,385 @@
+//后台盒子
+import public "MsgBase.proto";
+import public "Distributed.proto";
+import public "Common.proto";
+package LegendProtocol; 
+
+//后台盒子向服务器请求暂停所有外部服务器
+message RequestControlExternalService_B2P { 
+	optional MsgID msgId = 1 [default = B2P_RequestControlExternalService];
+	optional bool pause = 2;
+}
+
+//后台盒子向服务器请求暂停所有外部服务器
+message RequestControlExternalService_P2C { 
+	optional MsgID msgId = 1 [default = P2C_RequestControlExternalService];
+	optional int32 senderProxyServerId = 2;
+	optional int32 senderBoxPeerId = 3;
+	optional bool pause = 4;
+}
+
+//中心服务器通知所有外部服务器暂停服务
+message NotifyControlExternalService_C2X { 
+	optional MsgID msgId = 1 [default = C2X_NotifyControlExternalService];
+	optional int32 senderProxyServerId = 2;
+	optional int32 senderBoxPeerId = 3;
+	optional bool pause = 4;
+}
+
+//服务器回复盒子暂停所有外部服务器的请求
+message ReplyControlExternalService_P2B { 
+	optional MsgID msgId = 1 [default = P2B_ReplyControlExternalService];
+	optional bool pause = 2;
+}
+
+//后台盒子向服务器请求显示正在刷新到数据库中的缓存实例
+message RequestShowRunningDBCache_B2A { 
+	optional MsgID msgId = 1 [default = B2A_RequestShowRunningDBCache];
+	optional bool show = 2;
+}
+
+//后台盒子向服务器请求显示正在刷新到数据库中的缓存实例
+message RequestShowRunningDBCache_A2C { 
+	optional MsgID msgId = 1 [default = A2C_RequestShowRunningDBCache];
+	optional int32 senderACServerId = 2;
+	optional int32 senderBoxPeerId = 3;
+	optional bool show = 4;
+}
+
+//中心服务器通知所有缓存服务器显示正在刷新到数据库中的缓存实例
+message NotifyShowRunningDBCache_C2X { 
+	optional MsgID msgId = 1 [default = C2X_NotifyShowRunningDBCache];
+	optional int32 senderACServerId = 2;
+	optional int32 senderBoxPeerId = 3;
+	optional bool show = 4;
+}
+
+//服务器回复显示正在刷新到数据库中的缓存实例的请求
+message ReplyShowRunningDBCache_X2A { 
+	optional MsgID msgId = 1 [default = X2A_ReplyShowRunningDBCache];
+	optional int32 senderBoxPeerId = 2;
+	optional string dbCacheInstance = 3;
+	optional bool show = 4;
+	optional string fromServerName = 5;
+}
+
+//服务器回复显示正在刷新到数据库中的缓存实例的请求
+message ReplyShowRunningDBCache_A2B { 
+	optional MsgID msgId = 1 [default = A2B_ReplyShowRunningDBCache];
+	optional string dbCacheInstance = 2;
+	optional bool show = 3;
+	optional string fromServerName = 4;
+}
+
+
+//后台盒子向服务器请求关闭集群
+message RequestCloseCluster_X2X { 
+	optional MsgID msgId = 1 [default = X2X_RequestCloseCluster];
+}
+
+//中心服务器通知所有外部服务器关闭服务
+message NotifyCloseService_C2X { 
+	optional MsgID msgId = 1 [default = C2X_NotifyCloseService];
+}
+
+//后台盒子向网关请求负载信息
+message RequestLoadblanceStatus_B2P { 
+	optional MsgID msgId = 1 [default = B2P_RequestLoadblanceStatus];
+	optional string serverType = 2;
+}
+
+// 网关向中心服转发后台盒子负载信息的请求
+message RequestLoadblanceStatus_P2C {
+	optional MsgID msgId = 1 [default = P2C_RequestLoadblanceStatus];
+    optional string userId = 2;
+    optional string serverType = 3;
+}
+
+// 中心服往网关回复后台盒子负载信息的请求        
+message ReplyLoadblanceStatus_C2P {
+	optional MsgID msgId = 1 [default = C2P_ReplyLoadblanceStatus];
+    optional string userId = 2;
+    optional string serverType = 3;
+    repeated ServerInfo result = 4;
+}
+
+// 网关往后台盒子回复负载信息的请求    
+message ReplyLoadblanceStatus_P2B {
+	optional MsgID msgId = 1 [default = P2B_ReplyLoadblanceStatus];
+    optional string serverType = 2;
+    repeated ServerInfo result = 3;
+}
+
+//后台盒子压测模块向网关请求转发逻辑运算消息
+message RequestTestCalcLogic_B2P { 
+	optional MsgID msgId = 1 [default = B2P_RequestTestCalcLogic];
+	optional int32 param1 = 2;
+}
+
+//后台盒子压测模块转发网关的请求逻辑运算消息
+message RequestTestCalcLogic_P2L { 
+	optional MsgID msgId = 1 [default = P2L_RequestTestCalcLogic];
+	optional int32 param1 = 2;
+	optional string userId = 3;
+}
+
+//后台盒子压测模块逻辑服务器回复逻辑运算消息
+message ReplyTestCalcLogic_L2P { 
+	optional MsgID msgId = 1 [default = L2P_ReplyTestCalcLogic];
+	optional double result = 2;
+	optional string userId = 3;
+}
+
+//后台盒子压测模块网关服务器回复逻辑运算消息
+message ReplyTestCalcLogic_P2B { 
+	optional MsgID msgId = 1 [default = P2B_ReplyTestCalcLogic];
+	optional double result = 2;
+}
+
+//后台盒子压测模块向网关请求转发数据库操作消息
+message RequestTestDB_B2P { 
+	optional MsgID msgId = 1 [default = B2P_RequestTestDB];
+	optional DataOperate operate = 2;
+	optional DataStrategy strategy = 3;
+	optional int32 loop = 4;
+}
+
+//后台盒子压测模块转发网关的请求数据库操作消息
+message RequestTestDB_P2L { 
+	optional MsgID msgId = 1 [default = P2L_RequestTestDB];
+	optional DataOperate operate = 2;
+	optional DataStrategy strategy = 3;
+	optional int32 loop = 4;
+	optional string userId = 5;
+}
+
+//后台盒子压测模块转发逻辑服务器的请求数据库操作消息
+message RequestTestDB_L2D { 
+	optional MsgID msgId = 1 [default = L2D_RequestTestDB];
+	optional DataOperate operate = 2;
+	optional DataStrategy strategy = 3;
+	optional int32 loop = 4;
+	optional string userId = 5;
+}
+
+//后台盒子压测模块数据库服务器回复数据库操作结果
+message ReplyTestDB_D2L { 
+	optional MsgID msgId = 1 [default = D2L_ReplyTestDB];
+	optional double result = 2;
+	optional string userId = 3;
+}
+
+//后台盒子压测模块逻辑服务器回复数据库操作结果
+message ReplyTestDB_L2P { 
+	optional MsgID msgId = 1 [default = L2P_ReplyTestDB];
+	optional double result = 2;
+	optional string userId = 3;
+}
+
+//后台盒子压测模块网关服务器回复数据库操作结果
+message ReplyTestDB_P2B { 
+	optional MsgID msgId = 1 [default = P2B_ReplyTestDB];
+	optional double result = 2;
+}
+
+//数据缓存同步测试
+message RequestTestDBCacheSync_B2P { 
+	optional MsgID msgId = 1 [default = B2P_RequestTestDBCacheSync];
+	optional CacheSyncTestInfo data = 2;
+}
+
+//数据缓存同步测试
+message RequestTestDBCacheSync_P2L { 
+	optional MsgID msgId = 1 [default = P2L_RequestTestDBCacheSync];
+	optional CacheSyncTestInfo data = 2;
+	optional string userId = 3;
+}
+
+//数据缓存同步测试
+message RequestTestDBCacheSync_L2D { 
+	optional MsgID msgId = 1 [default = L2D_RequestTestDBCacheSync];
+	optional CacheSyncTestInfo data = 2;
+	optional string userId = 3;
+}
+
+//数据缓存同步测试
+message ReplyTestDBCacheSync_D2L { 
+	optional MsgID msgId = 1 [default = D2L_ReplyTestDBCacheSync];
+	optional CacheSyncTestInfo data = 2;
+	optional string userId = 3;
+}
+
+//数据缓存同步测试
+message ReplyTestDBCacheSync_L2P { 
+	optional MsgID msgId = 1 [default = L2P_ReplyTestDBCacheSync];
+	optional CacheSyncTestInfo data = 2;
+	optional string userId = 3;
+}
+
+//数据缓存同步测试
+message ReplyTestDBCacheSync_P2B { 
+	optional MsgID msgId = 1 [default = P2B_ReplyTestDBCacheSync];
+	optional CacheSyncTestInfo data = 2;
+}
+
+//数据缓存同步测试
+message RequestGetDBCacheData_B2P { 
+	optional MsgID msgId = 1 [default = B2P_RequestGetDBCacheData];
+	optional int32 dbServerId = 2;
+	optional uint64 guid = 3;
+}
+
+//数据缓存同步测试
+message RequestGetDBCacheData_P2L { 
+	optional MsgID msgId = 1 [default = P2L_RequestGetDBCacheData];
+	optional string userId = 2;
+	optional int32 dbServerId = 3;
+	optional uint64 guid = 4;
+}
+
+//数据缓存同步测试
+message RequestGetDBCacheData_L2D { 
+	optional MsgID msgId = 1 [default = L2D_RequestGetDBCacheData];
+	optional string userId = 2;
+	optional int32 dbServerId = 3;
+	optional uint64 guid = 4;
+}
+
+//数据缓存同步测试
+message ReplyGetDBCacheData_D2L { 
+	optional MsgID msgId = 1 [default = D2L_ReplyGetDBCacheData];
+	optional string userId = 2;
+	optional int32 paramTotal = 3;
+	optional int32 dbServerId = 4;
+}
+
+//数据缓存同步测试
+message ReplyGetDBCacheData_L2P { 
+	optional MsgID msgId = 1 [default = L2P_ReplyGetDBCacheData];
+	optional string userId = 2;
+	optional int32 paramTotal = 3;
+	optional int32 dbServerId = 4;
+}
+
+//数据缓存同步测试
+message ReplyGetDBCacheData_P2B { 
+	optional MsgID msgId = 1 [default = P2B_ReplyGetDBCacheData];
+	optional int32 paramTotal = 2;
+	optional int32 dbServerId = 3;
+}
+
+//请求热更新服务器配置
+message UpdateServerCfg_X2X { 
+	optional MsgID msgId = 1 [default = X2X_UpdateServerCfg];
+	optional string server = 2;
+	optional ServerCfgUpdateType updateType = 3;
+}
+
+//设置帐户权限
+message RequestSetUserAuthority_B2A {
+	optional MsgID msgId = 1 [default = B2A_RequestSetUserAuthority];
+	optional uint64 guid = 2;
+	optional UserAuthority auth = 3;
+	optional int32 lockTime = 4;
+}
+
+//设置帐户权限
+message RequestSetUserAuthority_A2D {
+	optional MsgID msgId = 1 [default = A2D_RequestSetUserAuthority];
+    optional int32 acPeerId = 2;
+    optional string mySelfUserId = 3;
+	optional uint64 guid = 4;
+	optional UserAuthority auth = 5;
+	optional int32 lockTime = 6;
+}
+
+//回复帐户权限设置
+message ReplySetUserAuthority_D2A {
+	optional MsgID msgId = 1 [default = D2A_ReplySetUserAuthority];
+    optional int32 acPeerId = 2;
+	optional UserInfo userInfo = 3;
+	optional ResultCode result = 4;
+}
+
+//回复帐户权限设置
+message ReplySetUserAuthority_A2B {
+	optional MsgID msgId = 1 [default = A2B_ReplySetUserAuthority];
+	optional UserInfo userInfo = 2;
+	optional ResultCode result = 3;
+}
+
+//请求获取所有特殊用户
+message RequestGetAllSpecificUser_B2A {
+	optional MsgID msgId = 1 [default = B2A_RequestGetAllSpecificUser];
+}
+
+//请求获取所有特殊用户
+message RequestGetAllSpecificUser_A2D {
+	optional MsgID msgId = 1 [default = A2D_RequestGetAllSpecificUser];
+    optional int32 acPeerId = 2;
+    optional string userId = 3;
+}
+
+//回复获取所有特殊帐户的请求
+message ReplyGetAllSpecificUser_D2A {
+	optional MsgID msgId = 1 [default = D2A_ReplyGetAllSpecificUser];
+    optional int32 acPeerId = 2;
+	repeated UserInfo allSpecificUser = 3;
+}
+
+//回复获取所有特殊帐户的请求
+message ReplyGetAllSpecificUser_A2B {
+	optional MsgID msgId = 1 [default = A2B_ReplyGetAllSpecificUser];
+	repeated UserInfo allSpecificUser = 2;
+}
+
+//后台请求创建房间
+message RequestCreateHouse_B2P{
+	optional MsgID msgId = 1 [default = B2P_RequestCreateHouse];
+}
+
+//后台请求创建房间
+message RequestCreateHouse_P2L{
+	optional MsgID msgId = 1 [default = P2L_RequestCreateHouse];
+    optional uint64 summonerId = 2;
+    optional int32 marketId = 3;
+}
+
+//后台返回创建房间
+message ReplyCreateHouse_P2B{
+	optional MsgID msgId = 1 [default = P2B_ReplyCreateHouse];
+    optional int32 houseId = 2;
+}
+
+//后台请求加入房间
+message RequestJoinHouse_B2P{
+	optional MsgID msgId = 1 [default = B2P_RequestJoinHouse];
+    optional int32 houseId = 2;
+}
+
+//后台请求加入房间
+message RequestJoinHouse_P2L{
+	optional MsgID msgId = 1 [default = P2L_RequestJoinHouse];
+    optional uint64 summonerId = 2;
+    optional int32 houseId = 3;
+}
+
+//后台返回加入房间
+message ReplyJoinHouse_P2B{
+	optional MsgID msgId = 1 [default = P2B_ReplyJoinHouse];
+    optional int32 houseId = 2;
+    optional bool bSuccess = 3;
+}
+
+//后台请求加入房间
+message RecvHouseEndSettlement_L2P{
+	optional MsgID msgId = 1 [default = L2P_RecvHouseEndSettlement];
+    optional uint64 summonerId = 2;
+    optional int32 houseId = 3;
+}
+
+//后台返回加入房间
+message RecvHouseEndSettlement_P2B{
+	optional MsgID msgId = 1 [default = P2B_RecvHouseEndSettlement];
+    optional int32 houseId = 2;
+}

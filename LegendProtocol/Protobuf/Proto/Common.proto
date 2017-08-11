@@ -1,0 +1,302 @@
+//公共定义
+import public "MsgBase.proto";
+package LegendProtocol; 
+
+//集群结点加入集群的方式
+enum NodeJoinWay
+ {
+	ClusterStart = 1;//随集群启动
+	HotUpdate = 2;//热更新修复
+	AddNode = 3;//新增子结点
+}
+
+//服务器配置更新方式
+enum ServerCfgUpdateType
+{
+	LocalConfig = 1;//本地配置
+	DBConfig = 2;//数据库配置
+}
+
+//服务器索引
+message ServerIndex
+{
+	optional string name = 1;
+	optional int32 id = 2;
+}
+
+//数据表操作类型
+enum DataOperate
+{
+	Insert = 1;
+    Select = 2;
+    Update = 3;
+    Delete = 4;
+}
+
+//数据表操作策略
+enum DataStrategy
+{
+	Cache = 1;
+	ORM = 2;
+	Sql = 3;
+}
+	
+
+//缓存一致性同步测试用的信息    
+message CacheSyncTestInfo
+{
+    optional int32 param1 = 1;
+    optional int32 param2 = 2;
+}
+
+
+//玩家的操作系统
+enum TerminalOS
+{
+	IOS = 1;
+	Android = 2;
+	PC = 3;
+}
+
+//玩家接入SDK
+enum TerminalLoginSDK
+{
+	SDK_Visitor = 1; //游客
+	SDK_FaceBook = 2;//海外脸书
+	SDK_GooglePlay = 3;//海外谷歌
+	SDK_YiJie = 4;//国内易接
+}
+
+//渠道类型
+enum ChannelType
+{
+    CT_Guest = 0;//游客
+    CT_360 = 1;//奇虎360
+    CT_YingYongBao = 2;//应用宝
+    CT_YouLong = 3;//游龙
+    CT_HuaWei = 4;//华为
+    CT_XiaoMi = 5;//小米
+    CT_OPPO = 6;//OPPO
+    CT_UC = 7;//UC
+    CT_JinLi = 8;//金立
+}
+
+//支付类型
+enum PayType
+{
+    AppStore = 1;//苹果商店
+    GooglePay = 2;//谷歌商店
+    AliPay = 3;//支付宝
+    YiJie = 4;//国内易接
+}
+
+//签名信息
+message SignatureInfo
+{
+	optional string signature = 1;
+	optional string signatureData = 2;
+}
+
+//用户权限
+enum UserAuthority
+{
+	Guest = 1;//普通用户
+	Admin = 2;//管理员
+	Root = 3;//超级管理员
+	Illegal = 4;//非法用户
+}
+
+//用户信息
+message UserInfo
+{
+	optional uint64 guid = 1;
+	optional string userId = 2;
+	optional string nickName = 3;
+	optional UserAuthority auth = 4;	
+	optional string unLockTime = 5;	
+}
+
+//游戏类型
+enum GameTypeName
+{
+	RunFast = 1;//跑得快
+	Mahjong = 2;//麻将
+	WordPlate = 3;//字牌
+}
+
+//性别
+enum UserSex
+{
+	Shemale = 0;//人妖
+	Male = 1;//男
+	Female = 2;//女
+}
+
+//房间玩家类型
+enum HousePlayerType
+{     
+	HouseOwner = 1; //房主
+	HouseGuest = 2; //普通玩家
+}
+
+//牌花
+enum Suit
+{        
+	Spade = 1; //黑桃       
+    Heart = 2;  //红桃        
+    Club = 3; //梅花        
+    Diamond = 4; //方片        
+    Joker = 5; //王
+}
+
+enum Rank
+{        
+	Three = 1;//3       
+    Four = 2; //4        
+    Five = 3;//5        
+    Six = 4;//6        
+    Seven = 5;//7        
+    Eight = 6;//8        
+    Nine = 7;//9        
+    Ten = 8;//10        
+    Jack = 9;//J        
+    Queen = 10;//Q        
+    King = 11;//K        
+    Ace = 12;//A        
+    Deuce = 13;//2        
+    LittleJoker = 14;//小王        
+    BigJoker = 15;//大王
+}
+
+//纸牌
+message Card
+{
+	optional Suit suit = 1;
+	optional Rank rank = 2;
+}
+
+//房间的类型
+enum HouseType
+{
+    NoneHouse = 0;			 //空
+    RunFastHouse = 1;        //跑得快
+    MahjongHouse = 2;        //麻将
+	WordPlateHouse = 3;		 //字牌
+}
+
+//玩家投票
+message PlayerVoteNode
+{
+    optional uint64 summonerId = 1;
+    optional VoteStatus voteStatus = 2;
+}
+
+//商家统计时间
+message RecordBusinessNode
+{
+	optional int32 businessId = 1;
+	optional string lastTime = 2;
+}
+
+//使用状态
+enum UseStatus
+{
+	 Used = 1; //已使用
+	 Unused = 2; //未使用
+}
+
+//优惠劵
+message TicketsNode
+{
+	optional uint64 id = 1;
+	optional int32 ticketsId = 2;	
+	optional UseStatus useStatus = 3;
+	optional string beginTime = 4;
+}
+
+//聊天类型
+enum ChatType
+{
+	 PureExpression = 1;	 //纯表情
+	 PureText = 2;		 	 //纯文字
+	 Text = 3;			 	 //文字	 
+	 Voice = 4;				 //语音
+}
+
+//在线类型
+enum LineType
+{
+	 OnLine = 1;				 //上线
+	 OffLine = 4;				 //离线
+}
+
+//投票状态
+enum VoteStatus
+{
+	FreeVote = 1;			//空闲状态
+	LaunchVote = 2;			//发起投票
+	AgreeVote = 3;			//同意投票
+	OpposeVote = 4;			//反对投票
+}
+
+//玩家结算类型
+enum SettlementType
+{     
+	Winner = 1;
+	Loser = 2;
+}
+
+//庄闲
+enum ZhuangLeisureType
+{
+    Zhuang = 0;     //庄
+    Leisure = 1;    //闲
+}
+
+//结果运算类型
+enum OperationType
+{     
+	UpdateData = 1;
+	AddData = 2;
+	DelData = 3;
+}
+
+//玩家大局积分
+message OverallIntegralNode
+{
+	optional int32 playerIndex = 1;
+	optional int32 allIntegral = 2;
+	optional string nickName = 3;
+	optional uint64 summonerId = 4;
+	optional UserSex userSex = 5;
+}
+
+ //玩家的牌组
+message PlayerTileNode
+{
+	optional int32 playerIndex = 1;
+	repeated int32 tileList = 2;
+}
+
+//玩家大局战绩
+message OverallRecordNode
+{
+	optional uint64 onlyHouseId = 1;
+	optional int32 houseCardId = 2;
+	optional int32 myIndex = 3;	
+	repeated OverallIntegralNode overallIntegralList = 4;
+	optional string createTime = 5;
+}
+
+message PlayerIntegral
+{
+    optional int32 playerIndex = 1;
+    optional int32 integral = 2;
+}
+
+message BureauRecordNode
+{
+	optional uint64 bureau = 1;	
+	repeated PlayerIntegral playerIntegralList = 2;
+	optional string bureauTime = 3;
+}

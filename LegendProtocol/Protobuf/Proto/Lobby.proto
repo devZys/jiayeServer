@@ -1,0 +1,51 @@
+//世界大厅
+import public "MsgBase.proto";
+package LegendProtocol; 
+
+
+/// 玩家进入世界    
+message EnterWorld_L2W {
+	optional MsgID msgId = 1 [default = L2W_EnterWorld];
+    optional uint64 id = 2;
+    optional string userId = 3;
+    optional string nickName = 4;
+    optional string loginTime = 5;
+    optional int32 proxyServerId = 6;
+    optional int32 logicServerId = 7;
+    optional int32 acServerId = 8;
+}
+
+/// 玩家离开世界    
+message LeaveWorld_L2W {
+	optional MsgID msgId = 1 [default = L2W_LeaveWorld];
+    optional uint64 summonerId = 2;
+}
+
+/// <summary>
+/// 旧帐号不退出的情况下异地连接到不同的认证服务器时世界服务器通过网关服务器来转发给旧认证服务器踢除旧连接
+message KickOldACPeer_W2P
+{
+	optional MsgID msgId = 1 [default = W2P_KickOldACPeer];
+    optional string userId = 2;
+    optional int32 oldACServerId = 3;
+    optional int32 newACServerId = 4;
+}
+
+/// <summary>
+/// 旧帐号不退出的情况下异地连接到不同的认证服务器时网关服务器转发世界服务器通知过来的消息让旧认证服务器踢除旧连接
+message KickOldACPeer_P2A
+{
+	optional MsgID msgId = 1 [default = P2A_KickOldACPeer];
+    optional string userId = 2;
+	optional int32 newServerId = 3;
+}
+
+/// <summary>
+/// 通知服务器发货
+message NotifyGameServerSendGoods_X2X
+{
+	optional MsgID msgId = 1 [default = X2X_NotifyGameServerSendGoods];
+    optional uint64 summonerId = 2;
+	optional int32 addRoomCardNum = 3;
+}
+

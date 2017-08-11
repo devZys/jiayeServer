@@ -1,0 +1,19 @@
+@echo off
+
+cd ..\Proto
+..\protobuf-net\ProtoGen\protogen.exe ^
+-i:Common.proto ^
+-i:Demo.proto ^
+-i:Distributed.proto ^
+-i:Lobby.proto ^
+-i:Login.proto ^
+-i:MainCity.proto ^
+-i:MsgBase.proto ^
+-i:Record.proto ^
+-i:RunFast.proto ^
+-i:SafeCheck.proto ^
+-i:ServiceBox.proto ^
+-i:SpecialActivities.proto ^
+-i:UIDAlloc.proto ^
+-o:..\Msg\Msg.cs -ns:LegendProtocol
+cd ..\Gen

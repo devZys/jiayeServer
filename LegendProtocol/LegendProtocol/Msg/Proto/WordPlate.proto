@@ -1,0 +1,1225 @@
+//公共定义
+import public "MsgBase.proto";
+import public "Common.proto";
+package LegendProtocol; 
+
+//字牌类型
+enum WordPlateType
+{  
+	WordPlateNone = 0;		//字牌
+	WaiHuZiPlate = 1;		//歪胡子
+}
+
+//牌类型
+enum PlateDescType
+{
+	EPD_Small = 0;		//小字牌
+	EPD_Big = 1;		//大字牌
+}
+
+//牌值
+enum PlateNumType
+{
+    EPN_None = 0;		
+    EPN_One = 1;        
+    EPN_Two = 2;
+    EPN_Three = 3;
+    EPN_Four = 4;
+    EPN_Five = 5;
+    EPN_Six = 6;
+    EPN_Seven = 7;
+    EPN_Eight = 8;
+    EPN_Nine = 9;
+    EPN_Ten = 10;       
+}
+
+//牌组类型
+enum PlateMeldType
+{
+    EPM_Pair = 0;				 //将牌、对子
+    EPM_Chow = 1;				 //吃(仅供胡牌显示用)
+    EPM_Sequence = 2;			 //顺子
+    EPM_Pong = 3;				 //碰
+    EPM_Triplet = 4;			 //坎
+    EPM_Wai = 5;				 //歪
+    EPM_Flutter = 6;			 //飘
+    EPM_Slip = 7;				 //溜
+    EPM_None = 8;			     //非牌组
+}
+
+//麻将牌组结构
+message PlateMeldNode
+{
+	optional PlateMeldType meldType = 1;
+	repeated int32 meldTileList = 2;
+}
+
+//房间状态
+enum WordPlateHouseStatus
+{     
+	 EWPS_FreeBureau = 0;	     //空闲	 
+	 EWPS_BeginBureau = 1;		 //开始状态
+	 EWPS_Settlement = 2;		 //结算状态	 
+	 EWPS_Dissolved = 3;		 //已经解散
+	 EWPS_EndBureau  = 4;		 //结束状态
+	 EWPS_GMDissolved = 5;		 //GM命令解散
+}
+
+//字牌玩家状态
+enum WordPlatePlayerStatus
+{   
+	 WordPlateFree = 1;			//空闲 
+	 WordPlateReady = 2;		//准备
+	 WordPlateMoCard = 3;		//摸牌状态
+	 WordPlateWaitCard = 4;		//等待出牌	 
+	 WordPlateShowCard = 5;		//已出牌 	 
+	 WordPlateWinCard = 6;		//胡牌 
+}
+
+//操作类型
+enum WordPlateOperatType
+{
+    EWPO_None = 0;     //非牌组
+    EWPO_Chow = 1;     //吃
+    EWPO_Pong = 2;     //碰
+    EWPO_Flutter = 3;  //飘
+    EWPO_WFlutter = 4;  //外飘(仅供判断优先级用)
+    EWPO_Hu = 5;       //胡
+    EWPO_Wai = 6;      //歪
+    EWPO_Slip = 7;     //溜
+    EWPO_NFlutter = 8;  //内飘(仅供判断优先级用)
+}
+
+//算番类型
+enum WordPlateFanType
+{
+    EWPF_None = 0;			  //非
+    EWPF_GodPlate = 1;		  //神腰
+    EWPF_NeiYuan = 2;	      //内元
+    EWPF_WaiYuan = 3;		  //外元
+    EWPF_SeabedHu = 4;        //海底胡
+    EWPF_PengPengHu = 5;      //对子胡
+    EWPF_HangHangXi = 6;      //行行息
+    EWPF_BigPlateHu = 7;	  //大字胡
+    EWPF_SmallPlateHu = 8;	  //小字胡
+    EWPF_RedPlateHu = 9;      //火火翻
+    EWPF_BlackPlateHu = 10;	  //黑字胡
+    EWPF_OneRedPlate = 11;    //一点红
+    EWPF_BaoTingHu = 12;      //报听胡
+    EWPF_DanPiaoHu = 13;      //单漂
+    EWPF_DoublePiaoHu = 14;   //双漂
+    EWPF_YinHu = 15;		  //印
+    EWPF_HuaRedHu = 16;       //花字胡
+}
+
+//记录存储类型
+enum WordPlateRecordType
+{
+    EWPR_None = 0;				  //非
+	EWPR_BeginGodTile = 1;	      //开始神牌
+	EWPR_Show = 2;				  //出牌
+	EWPR_GiveOff = 3;			  //发牌
+    EWPR_Chow = 4;				  //吃
+    EWPR_Wai = 5;				  //歪
+    EWPR_Pong = 6;				  //碰
+    EWPR_Flutter = 7;			  //飘
+    EWPR_Slip = 8;				  //溜
+    EWPR_Hu = 9;				  //胡
+    EWPR_OperatInfo = 10;		  //操作信息
+}
+
+//字牌记录结构
+message WordPlateNodeRecordNode
+{
+	optional int32 playerIndex = 1;					//玩家
+	optional int32 wordPlateNode = 2;				//字牌
+}
+
+//字牌记录结构
+message WordPlateGiveOffRecordNode
+{
+	optional int32 playerIndex = 1;					//玩家
+	optional int32 wordPlateNode = 2;				//字牌
+	optional int32 lastPlayerIndex = 3;				//上一个玩家
+	optional int32 lastWordPlateNode = 4;			//上一个字牌
+}
+
+//操作信息记录结构
+message WordPlateOperatInfoRecordNode
+{
+	optional int32 playerIndex = 1;						//玩家编号
+	repeated WordPlateOperatType operatTypeList = 2;	//原操作类型
+	optional WordPlateOperatType operatType = 3;		//操作类型
+	optional bool bOperat = 4;							//是否操作
+}
+
+//操作记录结构
+message WordPlateOperatRecordNode
+{
+	optional int32 playerIndex = 1;					//玩家
+	optional PlateMeldType meldType = 2;			//操作类型
+	repeated int32 meldWordPlateList = 3;			//操作字牌
+	optional int32 lastPlayerIndex = 4;				//上一个玩家
+	optional bool bOperatHand = 5;					//操作方式
+	optional bool bOperatMeld = 6;					//操作的是不是桌面牌
+}
+
+//字牌记录结构
+message WordPlateRecordNode
+{
+	optional WordPlateRecordType recordType = 1;		//记录存储类型
+	optional bytes recordData = 2;						//记录存储内容
+}
+
+//操作记录结构
+message WordPlateOperatNode
+{
+	optional int32 playerIndex = 1;						//玩家编号
+	repeated WordPlateOperatType operatTypeList = 2;	//原操作类型
+	optional WordPlateOperatType operatType = 3;		//操作类型
+	optional bool bWait = 4;							//是否等待
+	repeated int32 operatWordPlateList = 5;
+}
+
+//胡牌记录结构
+message WordPlateWinRecordNode
+{
+	optional int32 playerIndex = 1;						
+	optional int32 endGodTile = 2;		
+	optional int32 winWordPlate = 3;				
+}
+
+//算番结构
+message WordPlateFanNode
+{
+	optional WordPlateFanType fanType = 1;
+	optional int32 fanCount = 2;
+}
+
+//玩家当局信息
+message WordPlatePlayerBureau
+{
+    optional int32 playerIndex = 1;   
+    optional int32 bureauIntegral = 2;		 //当局总积分 
+}
+
+//字牌当局信息
+message WordPlateHouseBureau
+{
+    optional uint64 bureau = 1;   
+    repeated WordPlatePlayerBureau playerBureauList = 2;
+    optional string bureauTime = 3;   
+}
+
+//房间结束牌信息
+message HouseEndPlateInfo
+{
+    optional int32 winPlateTile = 1; 
+    optional int32 endGodTile = 2; 
+	repeated PlayerTileNode playerTileList = 3;
+	repeated int32 remainWordPlateList = 4;
+	optional bool bOperatHu = 5;
+}
+
+//玩家当局结算信息
+message WordPlatePlayerSettlementNode
+{
+    optional int32 playerIndex = 1;    
+    optional int32 bureauIntegral = 2;		 //当局总积分
+    optional int32 allIntegral = 3;			 //总积分  
+}
+
+//房间当局结算信息
+message WordPlateSettlementNode
+{
+    repeated WordPlateFanNode wordPlateFanList = 1;     
+	repeated WordPlatePlayerSettlementNode wordPlatePlayerList = 2;
+}
+
+//最后结算玩家
+message WordPlateEndSettlementNode
+{
+	optional int32 index = 1;
+	optional int32 winAmount = 2;
+    optional int32 allIntegral = 3;			   
+    optional int32 allWinScore = 4;			   
+}
+
+//上线的玩家结构
+message WordPlatePlayerOnlineNode
+{
+	optional int32 index = 1;
+	optional WordPlatePlayerStatus housePlayerStatus = 2;
+	optional bool bDeadHand = 3;
+	optional string nickName = 4;
+	optional int32 allIntegral = 5;
+	optional uint64 summonerId = 6;
+	optional LineType lineType = 7;
+    optional VoteStatus voteStatus = 8;
+    optional UserSex sex = 9;
+    repeated int32 showWordPlateList = 10;
+    optional string ip = 11;
+    repeated PlateMeldNode displayWordPlateList = 12;
+}
+
+//上线的玩家结构
+message WordPlateMyPlayerOnlineNode
+{
+	optional int32 index = 1;
+	optional WordPlatePlayerStatus housePlayerStatus = 2;
+	optional int32 allIntegral = 3;
+    optional VoteStatus voteStatus = 4;
+    optional bool bHosted = 5;
+	optional bool bDeadHand = 6;
+	optional bool bGiveUpWin = 7;
+	repeated int32 playerWordPlateList = 8;
+    repeated PlateMeldNode displayWordPlateList = 9;
+    repeated int32 showWordPlateList = 10;
+    repeated int32 passChowTileList = 11;
+}
+
+//字牌上线结构
+message WordPlateOnlineNode
+{
+	optional WordPlateMyPlayerOnlineNode myPlayerOnline = 1;
+	repeated WordPlatePlayerOnlineNode playerOnlineList = 2;
+}
+
+//简单的玩家结构
+message WordPlatePlayerShowNode
+{
+	optional int32 index = 1;
+	optional WordPlatePlayerStatus housePlayerStatus = 2;
+    optional string ip = 3;
+	optional string nickName = 4;
+	optional int32 allIntegral = 5;
+	optional uint64 summonerId = 6;
+	optional LineType lineType = 7;
+    optional UserSex sex = 8;
+}
+
+//字牌房间保存结构
+message WordPlateHouseNode
+{
+	optional uint64 houseId = 1;
+    optional int32 houseCardId = 2;
+    optional int32 currentBureau = 3;
+    optional int32 maxBureau = 4;
+    optional int32 maxPlayerNum = 5;
+    optional int32 maxWinScore = 6;
+	optional int32 businessId = 7;
+	optional int32 housePropertyType = 8;
+    optional int32 baseWinScore = 9;
+    optional int32 beginGodType = 10;
+    optional HouseType houseType = 11;
+    optional WordPlateType wordPlateType = 12;
+    optional WordPlateHouseStatus houseStatus = 13;
+    optional string createTime = 14;
+    optional int32 logicId = 15;
+}
+
+//房间玩家结构
+message WordPlateHousePlayerNode
+{
+    optional string userId = 1;
+    optional int32 playerIndex = 2;
+	optional uint64 summonerId = 3;
+    optional string nickName = 4;
+    optional UserSex sex = 5;
+    optional int32 allIntegral = 6;
+    optional ZhuangLeisureType zhuangLeisureType = 7;
+	optional int32 winAmount = 8;		   
+    optional int32 allWinScore = 9;	
+}
+
+//字牌玩家和当局结构
+message WordPlatePlayerBureauNode
+{
+    repeated WordPlateHousePlayerNode wordPlatePlayerList = 1;
+    repeated WordPlateHouseBureau wordPlateBureauList = 2;
+}
+
+//字牌回放结构
+message PlayerPlayBackWordPlate
+{
+	repeated PlayerTileNode playerInitTileList = 1;
+	repeated WordPlateRecordNode wordPlateRecordList = 2;
+    optional int32 beginGodType = 3;
+}
+
+//////////          协议             /////////////
+/// <summary>
+/// 玩家向网关服务器请求创建字牌房间
+message RequestCreateWordPlateHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestCreateWordPlateHouse];
+	optional WordPlateType wordPlateType = 2;
+	optional int32 maxBureau = 3;
+    optional int32 maxWinScore = 4;
+	optional int32 baseScore = 5;
+	optional int32 housePropertyType = 6;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求创建字牌房间
+message RequestCreateWordPlateHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestCreateWordPlateHouse];
+    optional uint64 summonerId = 2;
+	optional WordPlateType wordPlateType = 3;
+	optional int32 maxBureau = 4;
+    optional int32 maxWinScore = 5;
+	optional int32 baseScore = 6;
+	optional int32 housePropertyType = 7;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家创建字牌房间
+message ReplyCreateWordPlateHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyCreateWordPlateHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional WordPlateType wordPlateType = 4;
+	optional int32 maxBureau = 5;
+	optional int32 houseId = 6;
+	optional int32 allIntegral = 7;
+	optional uint64 onlyHouseId = 8;
+    optional int32 maxWinScore = 9;
+	optional int32 baseScore = 10;
+	optional int32 businessId = 11;
+	optional int32 housePropertyType = 12;
+	optional int32 competitionKey = 13;
+    optional int32 maxPlayerNum = 14;
+	optional WordPlatePlayerStatus housePlayerStatus = 15;
+}
+/// <summary>
+/// 网关服务器响应玩家创建字牌房间
+message ReplyCreateWordPlateHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyCreateWordPlateHouse];
+    optional ResultCode result = 2;
+	optional WordPlateType wordPlateType = 3;
+	optional int32 maxBureau = 4;
+	optional int32 houseId = 5;
+	optional int32 allIntegral = 6;
+	optional uint64 onlyHouseId = 7;
+    optional int32 maxWinScore = 8;
+	optional int32 baseScore = 9;
+	optional int32 businessId = 10;
+	optional int32 housePropertyType = 11;
+	optional int32 competitionKey = 12;
+    optional int32 maxPlayerNum = 13;
+	optional WordPlatePlayerStatus housePlayerStatus = 14;
+}
+/// <summary>
+/// 玩家向网关服务器请求加入字牌房间
+message RequestJoinWordPlateHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestJoinWordPlateHouse];
+	optional int32 houseId = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求加入字牌房间
+message RequestJoinWordPlateHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestJoinWordPlateHouse];
+    optional uint64 summonerId = 2;
+	optional int32 houseId = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家加入字牌房间
+message ReplyJoinWordPlateHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyJoinWordPlateHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional WordPlateType wordPlateType = 4;
+	optional int32 maxBureau = 5;
+	optional int32 houseId = 6;
+	optional bytes playerShow = 7;
+	optional int32 allIntegral = 8;
+	optional uint64 onlyHouseId = 9;
+    optional int32 maxWinScore = 10;
+	optional int32 baseScore = 11;
+	optional int32 businessId = 12;
+	optional int32 housePropertyType = 13;
+	optional int32 myIndex = 14;
+	optional int32 competitionKey = 15;
+    optional int32 maxPlayerNum = 16;
+	optional WordPlatePlayerStatus housePlayerStatus = 17;
+}
+/// <summary>
+/// 网关服务器响应玩家加入字牌房间
+message ReplyJoinWordPlateHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyJoinWordPlateHouse];
+    optional ResultCode result = 2;
+	optional WordPlateType wordPlateType = 3;
+	optional int32 maxBureau = 4;
+	optional int32 houseId = 5;
+	optional bytes playerShow = 6;
+	optional int32 allIntegral = 7;
+	optional uint64 onlyHouseId = 8;
+    optional int32 maxWinScore = 9;
+	optional int32 baseScore = 10;
+	optional int32 businessId = 11;
+	optional int32 housePropertyType = 12;
+	optional int32 myIndex = 13;
+	optional int32 competitionKey = 14;
+    optional int32 maxPlayerNum = 15;
+	optional WordPlatePlayerStatus housePlayerStatus = 16;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家加入字牌房间
+message RecvJoinWordPlateHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvJoinWordPlateHouse];
+    optional uint64 summonerId = 2;
+	optional WordPlatePlayerShowNode playerShow = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家加入字牌房间
+message RecvJoinWordPlateHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvJoinWordPlateHouse];
+	optional WordPlatePlayerShowNode playerShow = 2;
+}
+/// <summary>
+/// 玩家向网关服务器请求退出房间
+message RequestQuitWordPlateHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestQuitWordPlateHouse];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求退出房间
+message RequestQuitWordPlateHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestQuitWordPlateHouse];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器退出房间
+message ReplyQuitWordPlateHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyQuitWordPlateHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional bool bVote = 4;
+    optional int32 dissolveVoteTime = 5;
+}
+/// <summary>
+/// 网关服务器响应玩家退出房间
+message ReplyQuitWordPlateHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyQuitWordPlateHouse];
+    optional ResultCode result = 2;
+	optional bool bVote = 3;
+    optional int32 dissolveVoteTime = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家退出房间
+message RecvQuitWordPlateHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvQuitWordPlateHouse];
+    optional uint64 summonerId = 2;
+	optional bool bVote = 3;
+    optional int32 index = 4;
+    optional int32 dissolveVoteTime = 5;
+}
+/// <summary>
+/// 网关服务器响应玩家退出房间
+message RecvQuitWordPlateHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvQuitWordPlateHouse];
+	optional bool bVote = 2;
+    optional int32 index = 3;
+    optional int32 dissolveVoteTime = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家离开房间
+message RecvLeaveWordPlateHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvLeaveWordPlateHouse];
+    optional uint64 summonerId = 2;
+	optional int32 leaveIndex = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家离开房间
+message RecvLeaveWordPlateHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvLeaveWordPlateHouse];
+	optional int32 leaveIndex = 2;
+}
+/// <summary>
+/// 玩家向网关服务器请求解散房间投票
+message RequestWordPlateHouseVote_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestWordPlateHouseVote];
+	optional VoteStatus voteStatus = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求解散房间投票
+message RequestWordPlateHouseVote_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestWordPlateHouseVote];
+    optional uint64 summonerId = 2;
+	optional VoteStatus voteStatus = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器解散房间投票
+message ReplyWordPlateHouseVote_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyWordPlateHouseVote];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional VoteStatus voteStatus = 4;
+	optional VoteStatus houseVoteStatus = 5;
+}
+/// <summary>
+/// 网关服务器响应房间解散房间投票
+message ReplyWordPlateHouseVote_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyWordPlateHouseVote];
+    optional ResultCode result = 2;
+	optional VoteStatus voteStatus = 3;
+	optional VoteStatus houseVoteStatus = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器解散房间投票
+message RecvWordPlateHouseVote_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvWordPlateHouseVote];
+    optional uint64 summonerId = 2;
+	optional int32 index = 3;
+	optional VoteStatus voteStatus = 4;
+	optional VoteStatus houseVoteStatus = 5;
+}
+/// <summary>
+/// 网关服务器响应解散房间投票
+message RecvWordPlateHouseVote_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvWordPlateHouseVote];
+	optional int32 index = 2;
+	optional VoteStatus voteStatus = 3;
+	optional VoteStatus houseVoteStatus = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求准备
+message RequestReadyWordPlateHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestReadyWordPlateHouse];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求准备
+message RequestReadyWordPlateHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestReadyWordPlateHouse];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器准备
+message ReplyReadyWordPlateHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyReadyWordPlateHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家准备
+message ReplyReadyWordPlateHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyReadyWordPlateHouse];
+    optional ResultCode result = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家准备
+message RecvReadyWordPlateHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvReadyWordPlateHouse];
+    optional uint64 summonerId = 2;
+	optional int32 readyIndex = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家准备
+message RecvReadyWordPlateHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvReadyWordPlateHouse];
+	optional int32 readyIndex = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器开始字牌
+message RecvBeginWordPlate_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvBeginWordPlate];
+    optional uint64 summonerId = 2;
+	optional int32 currentShowCard = 3;
+	optional int32 currentBureau = 4;
+	repeated int32 wordPlateList = 5;
+	optional WordPlatePlayerStatus housePlayerStatus = 6;
+	optional int32 zhuangIndex = 7;
+    optional WordPlateHouseStatus houseStatus = 8;
+	optional int32 remainWordPlateCount = 9;
+	optional int32 godWordPlateTile = 10;
+}
+/// <summary>
+/// 网关服务器响应开始字牌
+message RecvBeginWordPlate_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvBeginWordPlate];
+	optional int32 currentShowCard = 2;
+	optional int32 currentBureau = 3;
+	repeated int32 wordPlateList = 4;
+	optional WordPlatePlayerStatus housePlayerStatus = 5;
+	optional int32 zhuangIndex = 6;
+    optional WordPlateHouseStatus houseStatus = 7;
+	optional int32 remainWordPlateCount = 8;
+	optional int32 godWordPlateTile = 9;
+}
+/// <summary>
+/// 玩家向网关服务器请求房间信息
+message RequestWordPlateHouseInfo_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestWordPlateHouseInfo];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求房间信息
+message RequestWordPlateHouseInfo_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestWordPlateHouseInfo];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器房间信息
+message ReplyWordPlateHouseInfo_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyWordPlateHouseInfo];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional int32 houseId = 4;
+    optional WordPlateHouseStatus houseStatus = 5;
+	optional WordPlateType wordPlateType = 6;
+	optional int32 maxBureau = 7;
+	optional int32 currentBureau = 8;
+	optional int32 currentShowCard = 9;
+	optional int32 currentWhoPlay = 10;
+	optional int32 currentWordPlate = 11;
+	optional bytes wordPlateOnlineNode = 13;
+	optional double houseVoteTime = 14;
+	optional uint64 onlyHouseId = 15;
+	optional int32 housePropertyType = 16;
+    optional int32 maxWinScore = 17;
+	optional int32 baseScore = 18;
+	optional int32 businessId = 19;
+	optional int32 remainWordPlateCount = 20;
+	repeated WordPlateOperatType operatTypeList = 21;
+	optional int32 zhuangIndex = 22;
+	optional int32 competitionKey = 23;
+	optional bool bIsPlayerShow = 24;
+    optional int32 maxPlayerNum = 25;
+    optional int32 beginGodType = 26;
+}
+/// <summary>
+/// 网关服务器响应房间信息
+message ReplyWordPlateHouseInfo_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyWordPlateHouseInfo];
+    optional ResultCode result = 2;
+	optional int32 houseId = 3;
+    optional WordPlateHouseStatus houseStatus = 4;
+	optional WordPlateType wordPlateType = 5;
+	optional int32 maxBureau = 6;
+	optional int32 currentBureau = 7;
+	optional int32 currentShowCard = 8;
+	optional int32 currentWhoPlay = 9;
+	optional int32 currentWordPlate = 10;
+	optional double houseVoteTime = 11;
+	optional uint64 onlyHouseId = 12;
+	optional int32 housePropertyType = 13;
+    optional int32 maxWinScore = 14;
+	optional int32 baseScore = 15;
+	optional int32 businessId = 16;
+	optional int32 remainWordPlateCount = 17;
+	repeated WordPlateOperatType operatTypeList = 18;
+	optional int32 zhuangIndex = 19;
+	optional bytes wordPlateOnlineNode = 21;
+	optional int32 competitionKey = 22;
+	optional bool bIsPlayerShow = 23;
+    optional int32 maxPlayerNum = 24;
+    optional int32 beginGodType = 25;
+}
+/// <summary>
+/// 玩家向网关服务器请求出牌
+message RequestShowWordPlate_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestShowWordPlate];
+	optional int32 wordPlateNode = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求出牌
+message RequestShowWordPlate_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestShowWordPlate];
+    optional uint64 summonerId = 2;
+	optional int32 wordPlateNode = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器出牌
+message ReplyShowWordPlate_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyShowWordPlate];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional int32 wordPlateNode = 4;
+	optional bool bGiveUpWin = 5;
+	optional bool bDeadHand = 6;
+}
+/// <summary>
+/// 网关服务器响应房间出牌
+message ReplyShowWordPlate_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyShowWordPlate];
+    optional ResultCode result = 2;
+	optional int32 wordPlateNode = 3;
+	optional bool bGiveUpWin = 4;
+	optional bool bDeadHand = 5;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器出牌
+message RecvShowWordPlate_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvShowWordPlate];
+    optional uint64 summonerId = 2;
+	optional int32 index = 3;
+	repeated WordPlateOperatType operatTypeList = 4;
+	optional int32 wordPlateNode = 5;
+	optional bool bIsPlayerShow = 6;
+	optional bool bDeadHand = 7;
+}
+/// <summary>
+/// 网关服务器响应出牌
+message RecvShowWordPlate_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvShowWordPlate];
+	optional int32 index = 2;
+	repeated WordPlateOperatType operatTypeList = 3;
+	optional int32 wordPlateNode = 4;
+	optional bool bIsPlayerShow = 5;
+	optional bool bDeadHand = 6;
+}
+/// <summary>
+/// 玩家向网关服务器请求操作
+message RequestOperatWordPlate_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestOperatWordPlate];
+	optional WordPlateOperatType operatType = 2;
+	repeated int32 wordPlateList = 3;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求操作
+message RequestOperatWordPlate_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestOperatWordPlate];
+    optional uint64 summonerId = 2;
+	optional WordPlateOperatType operatType = 3;
+	repeated int32 wordPlateList = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器操作
+message ReplyOperatWordPlate_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyOperatWordPlate];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional WordPlateOperatType operatType = 4;
+	repeated int32 wordPlateList = 5;
+	optional PlateMeldType meldType = 6;
+	optional int32 currentShowCard = 7;
+	optional WordPlatePlayerStatus housePlayerStatus = 8;
+	optional bool bGiveUpWin = 9;
+	optional bool bDeadHand = 10;
+	optional bool bOperatMyHand = 11;
+}
+/// <summary>
+/// 网关服务器响应房间操作
+message ReplyOperatWordPlate_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyOperatWordPlate];
+    optional ResultCode result = 2;
+	optional WordPlateOperatType operatType = 3;
+	repeated int32 wordPlateList = 4;
+	optional PlateMeldType meldType = 5;
+	optional int32 currentShowCard = 6;
+	optional WordPlatePlayerStatus housePlayerStatus = 7;
+	optional bool bGiveUpWin = 8;
+	optional bool bDeadHand = 9;
+	optional bool bOperatMyHand = 10;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器操作
+message RecvOperatWordPlate_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvOperatWordPlate];
+    optional uint64 summonerId = 2;
+	optional WordPlateOperatType operatType = 3;
+	repeated int32 wordPlateList = 4;
+	optional PlateMeldType meldType = 5;
+	optional int32 currentShowCard = 6;
+	optional bool bDeadHand = 7;
+	optional bool bOperatMyHand = 8;
+}
+/// <summary>
+/// 网关服务器下发房间操作
+message RecvOperatWordPlate_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvOperatWordPlate];
+	optional WordPlateOperatType operatType = 2;
+	repeated int32 wordPlateList = 3;
+	optional PlateMeldType meldType = 4;
+	optional int32 currentShowCard = 5;
+	optional bool bDeadHand = 6;
+	optional bool bOperatMyHand = 7;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器胡牌
+message RecvPlayerWinWordPlate_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvPlayerWinWordPlate];
+    optional uint64 summonerId = 2;
+	optional int32 winPlayerIndex = 3;
+	optional bytes housePlateInfo = 4;
+}
+/// <summary>
+/// 网关服务器下发房间胡牌
+message RecvPlayerWinWordPlate_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvPlayerWinWordPlate];
+	optional int32 winPlayerIndex = 2;
+	optional bytes housePlateInfo = 3;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器小局结算
+message RecvSettlementWordPlate_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvSettlementWordPlate];
+    optional uint64 summonerId = 2;
+	optional bytes wordPlateSettlement = 3;
+}
+/// <summary>
+/// 网关服务器下发小局结算
+message RecvSettlementWordPlate_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvSettlementWordPlate];
+	optional bytes wordPlateSettlement = 2;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器大局结算
+message RecvEndSettlementWordPlate_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvEndSettlementWordPlate];
+    optional uint64 summonerId = 2;
+	repeated WordPlateEndSettlementNode wordPlateEndSettlementList = 3;
+	optional WordPlateHouseStatus houseStatus = 4;
+	optional int32 allIntegral = 5;
+	optional TicketsNode ticketsNode = 6;
+}
+/// <summary>
+/// 网关服务器下发大局结算
+message RecvEndSettlementWordPlate_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvEndSettlementWordPlate];
+	repeated WordPlateEndSettlementNode wordPlateEndSettlementList = 2;
+	optional WordPlateHouseStatus houseStatus = 3;
+	optional int32 allIntegral = 4;
+	optional TicketsNode ticketsNode = 5;
+}
+/// <summary>
+/// 逻辑服务器下发网关服务器玩家吃臭牌
+message RecvPlayerPassChowWordPlate_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvPlayerPassChowWordPlate];
+    optional uint64 summonerId = 2;
+	optional int32 wordPlateNode = 3;
+}
+/// <summary>
+/// 网关服务器下发玩家吃臭牌
+message RecvPlayerPassChowWordPlate_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvPlayerPassChowWordPlate];
+	optional int32 wordPlateNode = 2;
+}
+/// <summary>
+/// 玩家向网关服务器请求大局战绩
+message RequestWordPlateOverallRecord_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestWordPlateOverallRecord];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求大局战绩
+message RequestWordPlateOverallRecord_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestWordPlateOverallRecord];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器请求大局战绩
+message RequestWordPlateOverallRecord_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestWordPlateOverallRecord];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// DB服务器响应大局战绩
+message ReplyWordPlateOverallRecord_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyWordPlateOverallRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional bytes overallRecord = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器大局战绩
+message ReplyWordPlateOverallRecord_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyWordPlateOverallRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional bytes overallRecord = 4;
+}
+/// <summary>
+/// 网关服务器响应房间大局战绩
+message ReplyWordPlateOverallRecord_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyWordPlateOverallRecord];
+    optional ResultCode result = 2;
+	optional bytes overallRecord = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求小局战绩
+message RequestWordPlateBureauRecord_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestWordPlateBureauRecord];
+	optional uint64 onlyHouseId = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求小局战绩
+message RequestWordPlateBureauRecord_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestWordPlateBureauRecord];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+}
+/// <summary>
+/// 逻辑服务器请求小局战绩
+message RequestWordPlateBureauRecord_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestWordPlateBureauRecord];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+}
+/// <summary>
+/// DB服务器响应小局战绩
+message ReplyWordPlateBureauRecord_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyWordPlateBureauRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional bytes bureauRecord = 5;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器小局战绩
+message ReplyWordPlateBureauRecord_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyWordPlateBureauRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional bytes bureauRecord = 5;
+}
+/// <summary>
+/// 网关服务器响应房间小局战绩
+message ReplyWordPlateBureauRecord_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyWordPlateBureauRecord];
+    optional ResultCode result = 2;
+	optional uint64 onlyHouseId = 3;
+	optional bytes bureauRecord = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求小局回放
+message RequestWordPlateBureauPlayback_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestWordPlateBureauPlayback];
+	optional uint64 onlyHouseId = 2;
+	optional uint64 bureau = 3;	
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求小局回放
+message RequestWordPlateBureauPlayback_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestWordPlateBureauPlayback];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+	optional uint64 bureau = 4;	
+}
+/// <summary>
+/// 逻辑服务器请求小局回放
+message RequestWordPlateBureauPlayback_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestWordPlateBureauPlayback];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+	optional uint64 bureau = 4;	
+}
+/// <summary>
+/// DB服务器响应小局回放
+message ReplyWordPlateBureauPlayback_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyWordPlateBureauPlayback];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional uint64 bureau = 5;
+	optional bytes playerWordPlate = 6;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器小局回放
+message ReplyWordPlateBureauPlayback_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyWordPlateBureauPlayback];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional uint64 bureau = 5;	
+	optional bytes playerWordPlate = 6;
+}
+/// <summary>
+/// 网关服务器响应房间小局回放
+message ReplyWordPlateBureauPlayback_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyWordPlateBureauPlayback];
+    optional ResultCode result = 2;
+	optional uint64 onlyHouseId = 3;
+	optional uint64 bureau = 4;	
+	optional bytes playerWordPlate = 5;
+}
+
+//////////////////////////////////////////////////////////
+/// <summary>
+/// 逻辑服务器请求房间信息
+message RequestWordPlateHouseInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestWordPlateHouseInfo];
+	optional int32 logicId = 2;
+}
+/// <summary>
+/// DB服务器响应房间信息
+message ReplyWordPlateHouseInfo_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyWordPlateHouseInfo];
+	optional bytes house = 2;
+	optional int32 dbServerID = 3;
+}
+/// <summary>
+/// 逻辑服务器请求房间玩家信息和牌局信息
+message RequestWordPlatePlayerAndBureau_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestWordPlatePlayerAndBureau];
+	optional uint64 houseId = 2;
+}
+/// <summary>
+/// DB服务器响应房间玩家和牌局信息
+message ReplyWordPlatePlayerAndBureau_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyWordPlatePlayerAndBureau];
+	optional uint64 houseId = 2;
+    optional bytes housePlayerBureau = 3;
+}
+/// <summary>
+/// 逻辑服务器请求保存新字牌房间信息
+message RequestSaveCreateWordPlateInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveCreateWordPlateInfo];
+	optional uint64 houseId = 2;
+    optional int32 houseCardId = 3;
+    optional int32 maxBureau = 4;
+    optional int32 maxWinScore = 5;
+    optional int32 maxPlayerNum = 6;
+	optional int32 businessId = 7;
+	optional int32 housePropertyType = 8;
+    optional int32 baseWinScore = 9;
+    optional HouseType houseType = 10;
+    optional WordPlateType wordPlateType = 11;
+    optional string createTime = 12;
+    optional uint64 summonerId = 13;
+    optional int32 index = 14;
+    optional int32 allIntegral = 15;
+    optional int32 logicId = 16;
+}
+/// <summary>
+/// 逻辑服务器请求保存新字牌玩家信息
+message RequestSaveWordPlateNewPlayer_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveWordPlateNewPlayer];
+	optional uint64 houseId = 2;
+    optional uint64 summonerId = 3;
+    optional int32 index = 4;
+    optional int32 allIntegral = 5;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间删除玩家
+message RequestDelWordPlateHousePlayer_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestDelWordPlateHousePlayer];
+	optional uint64 houseId = 2;
+    optional uint64 summonerId = 3;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间状态
+message RequestSaveWordPlateHouseStatus_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveWordPlateHouseStatus];
+	optional uint64 houseId = 2;
+    optional WordPlateHouseStatus houseStatus = 3;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间当局信息
+message RequestSaveWordPlateBureauInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveWordPlateBureauInfo];
+	optional uint64 houseId = 2;    
+    optional uint64 currentBureau = 3;   
+	optional bytes playerInitTile = 4;
+    optional string bureauTime = 5;  
+    repeated int32 playerIndexList = 6;
+    optional int32 beginGodTile = 7; 
+}
+/// <summary>
+/// 逻辑服务器请求保存房间玩家结算信息
+message RequestSaveWordPlatePlayerSettlement_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveWordPlatePlayerSettlement];
+	optional uint64 houseId = 2;
+    optional uint64 summonerId = 3;
+	optional int32 winAmount = 4;
+    optional int32 allIntegral = 5;
+	optional ZhuangLeisureType zhuangLeisureType = 6;
+	optional int32 allWinScore = 7;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间当局积分
+message RequestSaveWordPlateBureauIntegral_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveWordPlateBureauIntegral];
+	optional uint64 houseId = 2;
+    optional uint64 bureau = 3;
+	repeated WordPlatePlayerBureau playerBureauList = 4;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间回放步骤
+message RequestSaveWordPlateRecord_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveWordPlateRecord];
+	optional uint64 houseId = 2;
+    optional uint64 currentBureau = 3;
+    optional WordPlateRecordNode wordPlateRecordNode = 4;
+}

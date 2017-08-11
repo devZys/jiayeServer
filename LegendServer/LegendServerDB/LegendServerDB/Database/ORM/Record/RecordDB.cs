@@ -1,0 +1,3 @@
+﻿namespace LegendServer.Database.Record
+{
+}

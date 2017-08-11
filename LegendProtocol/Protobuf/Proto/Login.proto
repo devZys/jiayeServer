@@ -1,0 +1,83 @@
+//登陆系统
+import public "MsgBase.proto";
+import public "Common.proto";
+package LegendProtocol; 
+
+/// 玩家向AC请求登陆    
+message RequestLogin_T2A {
+	optional MsgID msgId = 1 [default = T2A_RequestLogin];
+    optional string nickName = 2;
+	optional TerminalOS os = 3;
+	optional string userId = 4;
+    optional string headImgUrl = 5;
+    optional UserSex sex = 6;
+}
+
+/// AC向DB进行登陆验证    
+message RequestLogin_A2D {
+	optional MsgID msgId = 1 [default = A2D_RequestLogin];
+    optional int32 acPeerId = 2;
+    optional int32 acId = 3;
+    optional string requesterIp = 4;
+    optional string userId = 5;
+    optional string nickName = 6;
+    optional string headImgUrl = 7;
+    optional UserSex sex = 8;
+}
+
+/// DB回复AC的登陆验证    
+message ReplyLogin_D2A {
+	optional MsgID msgId = 1 [default = D2A_ReplyLogin];
+    optional int32 acPeerId = 2;
+    optional ResultCode result = 3;
+    optional string unlockTime = 4;
+}
+
+/// DB通知Center玩家认证通过（Center将为进行负载均衡做最优服分配）    
+message NotifyVerifyPassed_D2C {
+	optional MsgID msgId = 1 [default = D2C_NotifyVerifyPassed];
+    optional int32 acPeerId = 2;
+    optional int32 acId = 3;
+    optional string requesterUserId = 4;
+	optional string requesterNickName = 5;
+	optional string requesterIp = 6;
+	optional UserAuthority auth = 7;
+	optional uint64 summonerId = 8;
+	optional int32 logicId = 9;
+}
+
+
+/// Center通知Proxy玩家终端的认证token    
+message TokenNotify_C2P {
+	optional MsgID msgId = 1 [default = C2P_TokenNotify];
+    optional string accessToken = 2;
+	repeated int32 closedACServerList = 3;	
+    optional int32 acPeerId = 4;
+    optional int32 acId = 5;
+	optional UserAuthority auth = 6;
+	optional uint64 summonerId = 7;
+}
+
+
+/// Center通知AC玩家的登陆数据    
+message NotifyLoginData_P2A {
+	optional MsgID msgId = 1 [default = P2A_NotifyLoginData];
+    optional int32 acPeerId = 2;
+    optional int32 proxyId = 3;
+    optional int32 logicId = 4;
+    optional string accessToken = 5;
+	repeated int32 closedACServerList = 6;
+	optional UserAuthority auth = 7;
+    optional string userId = 8;
+}
+
+/// 服务器回复玩家的登陆请求    
+message ReplyLogin_A2T {
+	optional MsgID msgId = 1 [default = A2T_ReplyLogin];
+    optional ResultCode result = 2;
+    optional string accessToken = 3;
+    optional int32 proxyId = 4;
+	repeated int32 closedACServerList = 5;
+    optional string unlockTime = 6;
+	optional UserAuthority auth = 7;
+}

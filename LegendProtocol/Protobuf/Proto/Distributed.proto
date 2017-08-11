@@ -1,0 +1,90 @@
+//分布式
+import public "MsgBase.proto";
+import public "Common.proto";
+package LegendProtocol; 
+
+//服务器信息    
+message ServerInfo
+{
+    optional string name = 1;//服务器名称
+    optional int32 id = 2;//服务器ID
+    optional ServerInternalStatus status = 3;//服务器内部状态
+    optional int32 ccu = 4;//同时在线人数
+	repeated ServerIndex allInboundServer = 5;//所有主动向我发起网络连接的服务器
+}
+
+//服务器内部状态
+enum ServerInternalStatus
+{
+    UnLoaded = 1;//未加载
+    Loaded = 2;//自身已经加载就绪
+    Running = 3;//运行中，发生于所有服务器都已经加载之后
+    Closed = 4;//已关闭
+};
+
+
+// 其他服务器从Center服务器请求DB配置 
+message RequestDBConfig_X2C { 
+	optional MsgID msgId	= 1 [default = X2C_RequestDBConfig];
+}
+
+// Center服务器回复其他服务器的DB配置请求
+message ReplyDBConfig_C2X { 
+	optional MsgID msgId	= 1 [default = C2X_ReplyDBConfig];
+	optional string address = 2;
+	optional string database = 3;
+	optional string user = 4;
+	optional string password = 5;
+	optional string port = 6;
+	optional int32 logicCount = 7;
+}
+
+// 其他服务器通知Center服务器自身已加载完毕
+message ServerLoadedNotify_X2C {
+	optional MsgID msgId = 1 [default = X2C_ServerLoadedNotify];
+	repeated ServerIndex allOutboundServer = 2;
+}
+
+// 当Center服务器收到所有服务器的已加载通知后通知有服务器都进入运行状态
+message ServerRunning_C2X {
+	optional MsgID msgId	= 1 [default = C2X_ServerRunning];
+    optional string publicKey = 2;
+	repeated int32 acServerSelfIdList = 3;
+	repeated int32 acServerDbIdList = 4;
+	repeated int32 logicServerSelfIdList = 5;
+	repeated int32 logicServerDbIdList = 6;
+	repeated int32 allDbServerId = 7;
+	optional NodeJoinWay joinWay = 8;
+	repeated ServerIndex allInboundServer= 9;
+}
+
+// 告诉自身的负载均衡状态给其他连接
+message NotifyLoadBlanceStatus_X2X {
+	optional MsgID msgId	= 1 [default = X2X_NotifyLoadBlanceStatus];
+	optional string name = 2;
+	optional int32 id = 3;
+	optional bool increase = 4;
+	optional int32 newCCU = 5;
+}
+
+// 通知某个服务器主动去重新连接目标服务器
+message NotifyReconnectTargetServer_C2X {
+	optional MsgID msgId = 1 [default = C2X_NotifyReconnectTargetServer];
+	optional string serverName = 2;
+	optional int32 serverId = 3;
+}
+
+// 数据库服务器之间的缓存同步 
+message SyncDBCache_D2D {
+	optional MsgID msgId = 1 [default = D2D_SyncDBCache];
+	optional bytes recordData = 2; 
+	optional string tableName = 3;
+	optional DataOperate operateType = 4;
+	repeated uint64 keyFieldValues = 5;
+}
+
+// 服务器关闭状态的通知
+message NotifyServerClosed_C2A {
+	optional MsgID msgId = 1 [default = C2A_NotifyServerClosed];
+	optional int32 acPeerId = 2;
+}

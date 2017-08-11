@@ -1,0 +1,770 @@
+package LegendProtocol; 
+
+//	Proxy       网关代理服务器
+//	AC          平台认证服务器
+//	Center      世界中心服务器
+//	DB          数据服务器
+//	Logic       逻辑服务器
+//	World       世界服务器
+//	Record      日志记录服务器
+//	Terminal    终端玩家
+//	Box         后台盒子
+//	X           以上任意一个服务器   
+
+//所有的消息ID号
+enum MsgID {
+
+	SYSTEM_BEGIN = 1;						//系统消息起始
+
+    X2P_LongHeartBeat = 2;					//超长心跳包[主要给后台工具测试用]
+    B2P_RequestLoadblanceStatus = 3;    	//后台盒子向网关请求负载信息
+    P2C_RequestLoadblanceStatus = 4;    	//网关向中心服转发后台盒子负载信息的请求
+    C2P_ReplyLoadblanceStatus = 5;      	//中心服往网关回复后台盒子负载信息的请求
+    P2B_ReplyLoadblanceStatus = 6;      	//网关往后台盒子回复负载信息的请求
+
+    X2C_RequestDBConfig = 7;            	//其他服务器从Center服务器请求DB配置
+    C2X_ReplyDBConfig = 8;					//Center服务器回复其他服务器的DB配置请求
+
+    X2C_ServerLoadedNotify = 9;				//其他服务器通知Center服务器自身已加载完毕
+    C2X_ServerRunning = 10;					//当Center服务器收到所有服务器的已加载通知后通知有服务器都进入运行状态
+    X2X_NotifyLoadBlanceStatus = 11;		//告诉自身的负载均衡状态给其他连接
+
+    T2A_RequestLogin = 12;               	//玩家向AC请求登陆
+    A2D_RequestLogin = 13;               	//AC向DB进行登陆验证
+    D2A_ReplyLogin = 14;                 	//DB给AC的登陆回复
+    D2C_NotifyVerifyPassed = 15;         	//DB通知Center玩家认证通过（Center将为进行负载均衡做最优服分配）
+    C2P_TokenNotify = 16;                	//Center通知Proxy玩家终端的认证key
+    P2A_NotifyLoginData = 17;            	//Center通知AC玩家的登陆数据     
+    A2T_ReplyLogin = 18;                 	//AC服务器回复玩家的登陆请求 
+
+    T2P_RequestOnline = 19;              	//玩家向网关服务器请求上线英雄
+    P2L_RequestOnline = 20;              	//网关服务器转发玩家向网关服务器请求上线英雄给逻辑服务器
+    L2D_RequestSummonerData = 21;        	//逻辑服务器往DB服务器请求召唤师数据
+    D2L_ReplySummonerData = 22;          	//DB回复逻辑服务器的召唤师数据请求
+    L2P_ReplyOnline = 23;                	//逻辑服务器回复网关服务器关于玩家的上线英雄请求
+    P2T_ReplyOnline = 24;                	//网关服务器响应玩家的上线英雄请求
+    L2W_EnterWorld = 25;                 	//玩家进入世界 
+    L2W_LeaveWorld = 26;                 	//玩家离开世界
+    P2L_RequestLogout = 27;              	//转发玩家的登出请求给逻辑服务器
+    W2P_KickOut = 28;                    	//世界服务器踢玩家
+
+    X2R_NotifyRecordLog = 29;            	//其他服务器通知日志服务器记录日志
+
+    B2P_RequestTestCalcLogic = 30;		 	//后台盒子压测模块向网关请求转发逻辑运算消息
+    P2L_RequestTestCalcLogic = 31;		 	//后台盒子压测模块转发网关的请求逻辑运算消息
+    L2P_ReplyTestCalcLogic = 32;		 	//后台盒子压测模块逻辑服务器回复逻辑运算消息
+    P2B_ReplyTestCalcLogic = 33;		 	//后台盒子压测模块网关服务器回复逻辑运算消息
+	
+    B2P_RequestTestDB = 34;					//后台盒子压测模块向网关请求转发数据库操作消息
+    P2L_RequestTestDB = 35;					//后台盒子压测模块转发网关的请求数据库操作消息
+    L2D_RequestTestDB = 36;					//后台盒子压测模块转发逻辑服务器的请求数据库操作消息
+    D2L_ReplyTestDB = 37;					//后台盒子压测模块数据库服务器回复数据库操作结果
+    L2P_ReplyTestDB = 38;					//后台盒子压测模块逻辑服务器回复数据库操作结果
+    P2B_ReplyTestDB = 39;					//后台盒子压测模块网关服务器回复数据库操作结果
+
+	D2D_SyncDBCache = 40;					//数据库服务器之间的缓存同步
+
+	B2P_RequestTestDBCacheSync = 41;		//后台盒子压测模块向网关请求转发缓存一致性测试消息
+    P2L_RequestTestDBCacheSync = 42;		//后台盒子压测模块转发网关的请求缓存一致性测试消息
+    L2D_RequestTestDBCacheSync = 43;		//后台盒子压测模块转发逻辑服务器的请求缓存一致性测试消息
+    D2L_ReplyTestDBCacheSync = 44;			//后台盒子压测模块数据库服务器回复缓存一致性测试结果
+    L2P_ReplyTestDBCacheSync = 45;			//后台盒子压测模块逻辑服务器回复缓存一致性测试结果
+    P2B_ReplyTestDBCacheSync = 46;			//后台盒子压测模块网关服务器回复缓存一致性测试结果
+
+	B2P_RequestGetDBCacheData = 47;			//后台盒子压测模块向网关请求转发获取缓存数据消息
+    P2L_RequestGetDBCacheData = 48;			//后台盒子压测模块转发网关的请求获取缓存数据消息
+    L2D_RequestGetDBCacheData = 49;			//后台盒子压测模块转发逻辑服务器的请求获取缓存数据消息
+    D2L_ReplyGetDBCacheData = 50;			//后台盒子压测模块数据库服务器回复获取缓存数据结果
+    L2P_ReplyGetDBCacheData = 51;			//后台盒子压测模块逻辑服务器回复获取缓存数据结果
+    P2B_ReplyGetDBCacheData = 52;			//后台盒子压测模块网关服务器回复获取缓存数据结果
+
+	X2X_UpdateServerCfg = 53;				//后台盒子请求热更新服务器配置
+
+	C2X_NotifyReconnectTargetServer = 54; 	//通知某个服务器主动去重新连接目标服务器		
+
+	B2P_RequestControlExternalService = 55;	//后台盒子向服务器请求暂停所有外部服务器
+	P2C_RequestControlExternalService = 56;	//后台盒子向服务器请求暂停所有外部服务器
+	C2X_NotifyControlExternalService = 57;	//中心服务器通知所有外部服务器暂停服务
+	P2B_ReplyControlExternalService = 58;	//服务器回复盒子暂停所有外部服务器的请求
+	B2A_RequestShowRunningDBCache = 59;		//后台盒子向服务器请求显示正在刷新到数据库中的缓存实例
+	A2C_RequestShowRunningDBCache = 60;		//后台盒子向服务器请求显示正在刷新到数据库中的缓存实例
+	C2X_NotifyShowRunningDBCache = 61;		//中心服务器通知所有缓存服务器显示正在刷新到数据库中的缓存实例
+	X2A_ReplyShowRunningDBCache = 62;		//服务器回复显示正在刷新到数据库中的缓存实例的请求
+	A2B_ReplyShowRunningDBCache = 63;		//服务器回复显示正在刷新到数据库中的缓存实例的请求
+	X2X_RequestCloseCluster = 64;			//后台盒子向服务器请求关闭集群
+	C2X_NotifyCloseService = 65;			//中心服务器通知所有外部服务器关闭服务		
+
+	W2P_KickOldACPeer = 66;					//旧帐号不退出的情况下异地连接到不同的认证服务器时世界服务器通过网关服务器来转发给旧认证服务器踢除旧连接
+	P2A_KickOldACPeer = 67;					//旧帐号不退出的情况下异地连接到不同的认证服务器时网关服务器转发世界服务器通知过来的消息让旧认证服务器踢除旧连接
+	
+	B2A_RequestSetUserAuthority = 68;		//请求设置用户权限
+	A2D_RequestSetUserAuthority = 69;		//请求设置用户权限
+	D2A_ReplySetUserAuthority = 70;			//回复用户权限设置
+	A2B_ReplySetUserAuthority = 71;			//回复用户权限设置
+	B2A_RequestGetAllSpecificUser = 72;		//请求获取所有特殊用户
+	A2D_RequestGetAllSpecificUser = 73;		//请求获取所有特殊用户
+	D2A_ReplyGetAllSpecificUser = 74;		//回复获取所有特殊帐户的请求
+	A2B_ReplyGetAllSpecificUser = 75;		//回复获取所有特殊帐户的请求
+
+	C2A_NotifyServerClosed = 76;			//服务器关闭状态的通知
+
+	B2P_RequestCreateHouse = 77;			//盒子请求创建房间
+    P2L_RequestCreateHouse  = 78;		    //网关服务器转发玩家向逻辑服务器请求创建房间
+    P2B_ReplyCreateHouse  = 79;			    //网关服务器响应创建房间
+		
+	B2P_RequestJoinHouse = 80;				//盒子请求加入房间
+    P2L_RequestJoinHouse  = 81;			    //网关服务器转发玩家向逻辑服务器请求加入房间
+    P2B_ReplyJoinHouse  = 82;			    //网关服务器响应加入房间
+
+    L2P_RecvHouseEndSettlement  = 83;			    //网关服务器转发玩家向逻辑服务器下发房间结束
+    P2B_RecvHouseEndSettlement  = 84;			    //网关服务器下发房间结束
+	
+	SYSTEM_END = 500;//系统消息结束
+
+	COMMON_BEGIN = 501;//公共消息开始	
+		
+	T2P_SendFeedback = 502;               //玩家往网关服务器发送信息反馈
+    P2L_SendFeedback = 503;               //网关服务器转发玩家信息反馈给逻辑服务器
+    L2D_SendFeedback = 504;               //请求数据库服务器发送信息反馈	
+
+	T2P_RequestGetDailySharing = 505;				   //玩家向网关服务器请求领取每日分享奖励
+    P2L_RequestGetDailySharing  = 506;               //网关服务器转发玩家向逻辑服务器请求领取每日分享奖励
+    L2P_ReplyGetDailySharing  = 507;                 //逻辑服务器回复网关服务器领取每日分享奖励
+    P2T_ReplyGetDailySharing  = 508;                 //网关服务器响应领取每日分享奖励	
+		
+    L2D_RequestSaveDailySharing = 509;                //逻辑服务器请求保存每日分享
+
+    L2D_RequestSaveHouseId = 510;                //逻辑服务器请求保存房间ID	
+    L2D_RequestSaveHouseCard = 511;                //逻辑服务器请求保存房卡	
+    L2D_RequestSavePlayerAllIntegral = 512;		   //逻辑服务器请求保存玩家总积分并清除房间号	
+
+    L2P_RecvPlayerHouseCard  = 513;                //逻辑服务器回复网关服务器结算房卡
+    P2T_RecvPlayerHouseCard  = 514;                //网关服务器响应结算房卡
+	
+    L2D_RequestSaveRecordBusiness = 515;                //逻辑服务器请求保存商家统计
+
+	T2P_RequestBindBelong = 516;							//绑定归属（邀请码）
+	P2L_RequestBindBelong = 517;							//绑定归属（邀请码）
+	L2D_RequestBindBelong = 518;							//绑定归属（邀请码）
+	D2L_ReplyBindBelong = 519;							//绑定归属（邀请码）
+	L2P_ReplyBindBelong = 520;							//绑定归属（邀请码）
+	P2T_ReplyBindBelong = 521;							//绑定归属（邀请码）
+
+	T2P_RequestPlayerLineType = 522;				   //玩家向网关服务器请求广播玩家状态
+    P2L_RequestPlayerLineType  = 523;		       //网关服务器转发玩家向网关服务器请求广播玩家状态
+				
+    L2P_RecvPlayerLineType  = 524;				   //逻辑服务器回复网关服务器玩家状态
+    P2T_RecvPlayerLineType  = 525;				   //网关服务器响应玩家状态
+		
+	T2P_RequestSendChat = 526;					  //玩家向网关服务器请求聊天
+    P2L_RequestSendChat  = 527;				      //网关服务器转发玩家向网关服务器请求聊天
+    L2P_ReplySendChat  = 528;					  //逻辑服务器回复网关服务器聊天
+    P2T_ReplySendChat  = 529;					  //网关服务器响应聊天
+		
+    L2P_RecvSendChat  = 530;					      //逻辑服务器回复网关服务器聊天
+    P2T_RecvSendChat  = 531;					      //网关服务器响应聊天
+
+	X2P_RequestMarketKey = 532;//请求商场口令
+	P2W_RequestMarketKey = 533;//请求商场口令
+	W2P_ReplyMarketKey = 534;//回复商场口令
+	P2X_ReplyMarketKey = 535;//回复商场口令
+	
+	X2P_RequestJoinMarket = 536;//请求加入商场
+	P2W_RequestJoinMarket = 537;//请求加入商场
+	W2P_ReplyJoinMarket = 538;//回复加入商场
+	P2X_ReplyJoinMarket = 539;//回复加入商场
+	W2L_NotifyJoinMarket = 540;//通知逻辑服务器有玩家通过口令加入商场
+
+	X2X_RequestSaveCacheData = 541;//请求保存缓存数据
+	W2X_NotifySaveCacheData = 542;//通知保存缓存数据
+
+	L2D_RequestSaveTickets = 543;				//逻辑服务器请求保存优惠券
+    L2D_RequestDelTickets = 544;                //逻辑服务器请求删除优惠券	
+	
+    T2P_RequestUseTickets = 545;              //玩家向网关服务器请求使用优惠券
+    P2L_RequestUseTickets = 546;              //网关服务器转发玩家向网关服务器请求使用优惠券
+    L2P_ReplyUseTickets = 547;                //逻辑服务器回复网关服务器使用优惠券
+    P2T_ReplyUseTickets = 548;                //网关服务器响应使用优惠券
+
+    L2D_RequestUseTickets = 549;				//逻辑服务器请求使用优惠券
+	
+    T2P_RequestTicketsInfo = 550;              //玩家向网关服务器请求优惠券信息
+    P2L_RequestTicketsInfo = 551;              //网关服务器转发玩家向网关服务器请求优惠券信息
+    L2P_ReplyTicketsInfo = 552;                //逻辑服务器回复网关服务器优惠券信息
+    P2T_ReplyTicketsInfo = 553;                //网关服务器响应优惠券信息
+	
+	X2P_RequestMarketVersion = 554;				//请求商场版本号
+	P2X_ReplyMarketVersion = 555;				//回复商场版本号
+	
+    T2P_RequestPlayerHeadImgUrl = 556;              //玩家向网关服务器请求玩家头像信息
+    P2L_RequestPlayerHeadImgUrl = 557;              //网关服务器转发玩家向逻辑服务器请求玩家头像信息
+    L2D_RequestPlayerHeadImgUrl = 558;				//逻辑服务器请求玩家头像信息
+    D2L_ReplyPlayerHeadImgUrl = 559;				//DB服务器回复玩家头像信息
+    L2P_ReplyPlayerHeadImgUrl = 560;                //逻辑服务器回复网关服务器玩家头像信息
+    P2T_ReplyPlayerHeadImgUrl = 561;                //网关服务器响应玩家头像信息
+
+    T2P_RequestSavePlayerAddress = 562;              //玩家向网关服务器请求保存玩家地址
+    P2L_RequestSavePlayerAddress = 563;              //网关服务器转发玩家向逻辑服务器请求保存玩家地址
+
+    T2P_RequestOtherPlayerAddress = 564;              //玩家向网关服务器请求其他玩家地址
+    P2L_RequestOtherPlayerAddress = 565;              //网关服务器转发玩家向逻辑服务器请求其他玩家地址
+    L2P_ReplyOtherPlayerAddress = 566;                //逻辑服务器回复网关服务器其他玩家地址
+    P2T_ReplyOtherPlayerAddress = 567;                //网关服务器响应其他玩家地址
+		
+    D2L_RequestDelZombieHouse  = 568;				  //DB服务器请求删除僵尸房
+
+	T2P_RequestPlayerOperateHosted = 569;			//玩家向网关服务器请求玩家托管操作
+    P2L_RequestPlayerOperateHosted = 570;			//网关服务器转发玩家向逻辑服务器请求玩家托管操作
+
+    L2P_RecvPlayerHostedStatus = 571;               //逻辑服务器下发网关服务器玩家托管状态
+    P2T_RecvPlayerHostedStatus = 572;               //网关服务器下发玩家托管状态	
+		
+    L2D_RequestSaveCompetitionKey = 573;			//逻辑服务器请求玩家保存比赛场口令
+
+    L2D_RequestInitHouseIdAndComKey = 574;			//逻辑服务器请求玩家清除房间号和比赛场口令	
+
+    L2W_RequestInitCompetitionKey = 575;			//逻辑服务器请求清除比赛场口令
+
+    T2P_RequestQuitMarketCompetition = 576;         //玩家向网关服务器请求退出比赛场
+    P2L_RequestQuitMarketCompetition = 577;         //网关服务器转发玩家向逻辑服务器请求退出比赛场
+    L2P_ReplyQuitMarketCompetition = 578;           //逻辑服务器回复网关服务器退出比赛场
+    P2T_ReplyQuitMarketCompetition = 579;           //网关服务器响应退出比赛场
+	
+	L2P_ReplyJoinMarketCompetition = 580;			//回复加入商场比赛场
+	P2T_ReplyJoinMarketCompetition = 581;			//回复加入商场比赛场
+
+    T2P_RequestCreateMarketCompetition = 582;         //玩家向网关服务器请求创建比赛场
+    P2W_RequestCreateMarketCompetition = 583;         //网关服务器转发玩家向世界服务器请求创建比赛场
+    W2L_RequestCreateMarketCompetition = 584;         //世界服务器转发玩家向逻辑服务器请求创建比赛场
+    L2W_ReplyCreateMarketCompetition = 585;           //逻辑服务器回复世界服务器创建比赛场
+    W2P_ReplyCreateMarketCompetition = 586;           //世界服务器回复网关服务器创建比赛场
+    P2T_ReplyCreateMarketCompetition = 587;           //网关服务器响应创建比赛场
+
+    T2P_RequestMarketCompetitionInfo = 588;			//玩家向网关服务器请求商场比赛场信息
+    P2L_RequestMarketCompetitionInfo = 589;         //网关服务器转发玩家向逻辑服务器请求商场比赛场信息
+    L2P_ReplyMarketCompetitionInfo = 590;           //逻辑服务器回复网关服务器商场比赛场信息
+    P2T_ReplyMarketCompetitionInfo = 591;           //网关服务器响应商场比赛场信息
+
+    T2P_RequestCompetitionPlayerInfo = 592;			//玩家向网关服务器请求商场比赛场玩家信息
+    P2L_RequestCompetitionPlayerInfo = 593;         //网关服务器转发玩家向逻辑服务器请求商场比赛场玩家信息
+    L2P_ReplyCompetitionPlayerInfo = 594;           //逻辑服务器回复网关服务器商场比赛场玩家信息
+    P2T_ReplyCompetitionPlayerInfo = 595;           //网关服务器响应商场比赛场玩家信息
+
+    L2P_RecvCompetitionPlayerRank = 596;               //逻辑服务器下发网关服务器玩家名次
+    P2T_RecvCompetitionPlayerRank = 597;               //网关服务器下发玩家名次
+
+    L2P_RecvCompetitionPlayerOverRank = 598;               //逻辑服务器下发网关服务器玩家结束名次
+    P2T_RecvCompetitionPlayerOverRank = 599;               //网关服务器下发玩家结束名次
+
+    T2P_RequestCompetitionPlayerOnline = 600;		  //玩家向网关服务器请求商场比赛场玩家上线信息
+    P2L_RequestCompetitionPlayerOnline = 601;         //网关服务器转发玩家向逻辑服务器请求商场比赛场玩家上线信息
+
+    L2P_RecvCompetitionPlayerApplyNum = 602;           //逻辑服务器回复网关服务器商场比赛场玩家人数信息
+    P2T_RecvCompetitionPlayerApplyNum = 603;           //网关服务器响应商场比赛场玩家人数信息
+
+    T2P_RequestDelMarketCompetition = 604;		   //玩家向网关服务器请求删除商场比赛场
+    P2L_RequestDelMarketCompetition = 605;         //网关服务器转发玩家向逻辑服务器请求删除商场比赛场
+    L2P_ReplyDelMarketCompetition = 606;           //逻辑服务器回复网关服务器删除商场比赛场
+    P2T_ReplyDelMarketCompetition = 607;           //网关服务器响应删除商场比赛场
+	X2X_RequestUID = 608;							//请求分配UID
+	X2X_ReplyUID = 609;								//回复分配UID的请求
+		
+	X2X_NotifyRecycleUID = 610;					//通知回收UID
+
+	L2W_RequestHouseBelong = 611;				//向世界服务器请求房间的归属服务器
+	W2L_ReplyHouseBelong = 612;					//世界服务器回复房间归属服务器的请求
+	L2P_TransmitPlayerInfo = 613;				//传送玩家的信息到目标服务器
+	P2L_TransmitPlayerInfo = 614;				//传送玩家的信息到目标服务器
+	
+	X2R_NotifyRecordLoginUser = 615;			//其他服务器通知记录服务器统计登陆玩家
+	X2R_NotifyRecordRoomCard = 616;				//其他服务器通知记录服务器统计玩家房卡
+	X2R_NotifyRecordBusinessUser = 617;			//其他服务器通知记录服务器统计商家
+
+    D2L_NotifyUpdateAnnouncement = 618;			//DB通知逻辑服更新公告
+    L2P_RecvUpdateAnnouncement  = 619;			//逻辑服务器回复网关服务器更新公告
+    P2T_RecvUpdateAnnouncement  = 620;			//网关服务器响应更新公告
+
+    T2P_RequestAnnouncement = 621;              //玩家向网关服务器请求公告信息
+    P2L_RequestAnnouncement = 622;              //网关服务器转发玩家向逻辑服务器请求公告信息
+    L2P_ReplyAnnouncement = 623;                //逻辑服务器回复网关服务器公告信息
+    P2T_ReplyAnnouncement = 624;                //网关服务器响应公告信息
+
+    L2D_NotifyDBClearHouse = 625;				//逻辑服务器通知清理无用的房间
+	
+	W2D_NotifyCreateCompetition = 626;			//世界服通知DB服更新比赛场信息
+	W2D_NotifyDelCompetition = 627;				//世界服通知DB服删除比赛场信息
+
+	L2W_RequestMarketCompetitionBelong = 628;	//向世界服务器请求商家比赛场的归属服务器
+	W2L_ReplyMarketCompetitionBelong = 629;		//世界服务器回复商家比赛场归属服务器的请求
+
+	X2X_NotifyGameServerSendGoods = 630;		//通知服务器发货
+
+	COMMON_END = 999;//公共消息结束	
+
+	RUNFAST_BEGIN = 1000;					//跑得快消息起始	
+	
+    T2P_RequestCreateRunFastHouse = 1001;              //玩家向网关服务器请求创建跑得快房间
+    P2L_RequestCreateRunFastHouse = 1002;              //网关服务器转发玩家向网关服务器请求创建跑得快房间
+    L2P_ReplyCreateRunFastHouse = 1003;                //逻辑服务器回复网关服务器创建跑得快房间
+    P2T_ReplyCreateRunFastHouse = 1004;                //网关服务器响应创建跑得快房间
+
+	T2P_RequestJoinRunFastHouse = 1005;              //玩家向网关服务器请求加入跑得快房间
+    P2L_RequestJoinRunFastHouse = 1006;              //网关服务器转发玩家向网关服务器请求加入跑得快房间
+    L2P_ReplyJoinRunFastHouse = 1007;                //逻辑服务器回复网关服务器加入跑得快房间
+    P2T_ReplyJoinRunFastHouse = 1008;                //网关服务器响应加入跑得快房间
+	
+    L2P_RecvJoinRunFastHouse = 1009;                //逻辑服务器回复网关服务器加入跑得快房间
+    P2T_RecvJoinRunFastHouse = 1010;                //网关服务器响应加入跑得快房间
+		
+    L2P_RecvBeginRunFast = 1011;                //逻辑服务器回复网关服务器开始跑得快
+    P2T_RecvBeginRunFast = 1012;                //网关服务器响应开始跑得快
+
+	T2P_RequestShowRunFastCard = 1013;              //玩家向网关服务器请求出牌
+    P2L_RequestShowRunFastCard  = 1014;              //网关服务器转发玩家向网关服务器请求出牌
+    L2P_ReplyShowRunFastCard  = 1015;                //逻辑服务器回复网关服务器出牌
+    P2T_ReplyShowRunFastCard  = 1016;                //网关服务器响应出牌
+		
+    L2P_RecvShowRunFastCard  = 1017;                //逻辑服务器回复网关服务器出牌
+    P2T_RecvShowRunFastCard  = 1018;                //网关服务器响应出牌
+
+	T2P_RequestPassRunFastCard = 1019;				 //玩家向网关服务器请求过牌
+    P2L_RequestPassRunFastCard  = 1020;              //网关服务器转发玩家向网关服务器请求过牌
+    L2P_ReplyPassRunFastCard  = 1021;                //逻辑服务器回复网关服务器过牌
+    P2T_ReplyPassRunFastCard  = 1022;                //网关服务器响应过牌
+		
+    L2P_RecvPassRunFastCard  = 1023;                //逻辑服务器回复网关服务器过牌
+    P2T_RecvPassRunFastCard  = 1024;                //网关服务器响应过牌
+
+	T2P_RequestQuitRunFastHouse = 1025;				 //玩家向网关服务器请求退出房间
+    P2L_RequestQuitRunFastHouse  = 1026;              //网关服务器转发玩家向网关服务器请求退出房间
+    L2P_ReplyQuitRunFastHouse  = 1027;                //逻辑服务器回复网关服务器退出房间
+    P2T_ReplyQuitRunFastHouse  = 1028;                //网关服务器响应退出房间
+		
+    L2P_RecvQuitRunFastHouse  = 1029;                //逻辑服务器回复网关服务器退出房间
+    P2T_RecvQuitRunFastHouse  = 1030;                //网关服务器响应退出房间
+
+    L2P_RecvLeaveRunFastHouse  = 1031;                //逻辑服务器回复网关服务器离开房间
+    P2T_RecvLeaveRunFastHouse  = 1032;                //网关服务器响应离开房间
+	
+    L2P_RecvZhaDanIntegral  = 1033;                //逻辑服务器回复网关服务器炸弹积分
+    P2T_RecvZhaDanIntegral  = 1034;                //网关服务器响应炸弹积分
+
+    L2P_RecvSettlementRunFast  = 1035;                //逻辑服务器回复网关服务器结算
+    P2T_RecvSettlementRunFast  = 1036;                //网关服务器响应结算	
+
+	T2P_RequestReadyRunFastHouse = 1037;				 //玩家向网关服务器请求准备
+    P2L_RequestReadyRunFastHouse  = 1038;              //网关服务器转发玩家向网关服务器请求准备
+    L2P_ReplyReadyRunFastHouse  = 1039;                //逻辑服务器回复网关服务器准备
+    P2T_ReplyReadyRunFastHouse  = 1040;                //网关服务器响应准备
+		
+    L2P_RecvReadyRunFastHouse  = 1041;                //逻辑服务器回复网关服务器准备
+    P2T_RecvReadyRunFastHouse  = 1042;                //网关服务器响应准备
+
+    L2P_RecvEndSettlementRunFast  = 1043;                //逻辑服务器回复网关服务器结束结算
+    P2T_RecvEndSettlementRunFast  = 1044;                //网关服务器响应结束结算		
+	
+	T2P_RequestRunFastHouseInfo = 1045;				   //玩家向网关服务器请求房间信息
+    P2L_RequestRunFastHouseInfo  = 1046;               //网关服务器转发玩家向网关服务器请求房间信息
+    L2P_ReplyRunFastHouseInfo  = 1047;                 //逻辑服务器回复网关服务器房间信息
+    P2T_ReplyRunFastHouseInfo  = 1048;                 //网关服务器响应房间信息	
+	
+	T2P_RequestDissolveHouseVote = 1049;				   //玩家向网关服务器请求解散房间投票
+    P2L_RequestDissolveHouseVote  = 1050;		           //网关服务器转发玩家向网关服务器请求解散房间投票
+    L2P_ReplyDissolveHouseVote  = 1051;			          //逻辑服务器回复网关服务器解散房间投票
+    P2T_ReplyDissolveHouseVote  = 1052;				      //网关服务器响应解散房间投票
+				
+    L2P_RecvDissolveHouseVote  = 1053;					      //逻辑服务器回复网关服务器解散房间投票
+    P2T_RecvDissolveHouseVote  = 1054;					       //网关服务器响应解散房间投票
+	
+	T2P_RequestRunFastOverallRecord = 1055;				  //玩家向网关服务器请求大局战绩
+    P2L_RequestRunFastOverallRecord  = 1056;		      //网关服务器转发玩家向网关服务器请求大局战绩
+    L2D_RequestRunFastOverallRecord = 1057;				  //逻辑服务器请求大局战绩
+    D2L_ReplyRunFastOverallRecord  = 1058;				  //DB服务器响应大局战绩
+    L2P_ReplyRunFastOverallRecord  = 1059;			      //逻辑服务器回复网关服务器大局战绩
+    P2T_ReplyRunFastOverallRecord  = 1060;				  //网关服务器响应大局战绩
+	
+	T2P_RequestRunFastBureauRecord = 1061;				  //玩家向网关服务器请求小局战绩
+    P2L_RequestRunFastBureauRecord  = 1062;				  //网关服务器转发玩家向网关服务器请求小局战绩
+    L2D_RequestRunFastBureauRecord = 1063;				  //逻辑服务器请求小局战绩
+    D2L_ReplyRunFastBureauRecord  = 1064;				  //DB服务器响应小局战绩
+    L2P_ReplyRunFastBureauRecord  = 1065;			      //逻辑服务器回复网关服务器小局战绩
+    P2T_ReplyRunFastBureauRecord  = 1066;				  //网关服务器响应小局战绩
+	
+	T2P_RequestRunFastBureauPlayback = 1067;			  //玩家向网关服务器请求小局回放
+    P2L_RequestRunFastBureauPlayback  = 1068;			  //网关服务器转发玩家向网关服务器请求小局回放
+    L2D_RequestRunFastBureauPlayback = 1069;			  //逻辑服务器请求小局回放
+    D2L_ReplyRunFastBureauPlayback  = 1070;				  //DB服务器响应小局回放
+    L2P_ReplyRunFastBureauPlayback  = 1071;			      //逻辑服务器回复网关服务器小局回放
+    P2T_ReplyRunFastBureauPlayback  = 1072;				  //网关服务器响应小局回放
+
+    L2D_RequestHouseInfo = 1073;					   //逻辑服务器请求房间信息
+    D2L_ReplyHouseInfo  = 1074;						   //DB服务器响应房间信息
+
+    L2D_RequestHousePlayerAndBureau = 1075;				//逻辑服务器请求房间玩家信息和牌局信息
+    D2L_ReplyHousePlayerAndBureau  = 1076;				//DB服务器响应房间玩家和牌局信息
+	
+    L2D_RequestSaveCreateRunFastInfo = 1077;         //逻辑服务器请求保存创建新房间信息		
+    L2D_RequestSaveRunFastNewPlayer = 1078;          //逻辑服务器请求保存房间新玩家信息	
+    L2D_RequestDelHousePlayer = 1079;                //逻辑服务器请求保存房间删除玩家
+    L2D_RequestSaveRunFastHouseStatus = 1080;			   //逻辑服务器请求保存房间状态
+	L2D_RequestSaveRunFastBureauInfo = 1081;			   //逻辑服务器请求保存房间当局信息	
+    L2D_RequestSaveRunFastPlayerSettlement = 1082;		   //逻辑服务器请求保存房间玩家结算信息
+    L2D_RequestSaveRunFastBureauIntegral = 1083;		   //逻辑服务器请求保存房间当局积分
+    L2D_RequestSaveBureauShowCard = 1084;               //逻辑服务器请求保存房间当局出牌信息
+	L2D_RequestSaveDissolveRunFastInfo = 1085;			//逻辑服务器请求保存房间解散时同步信息
+
+	RUNFAST_END = 2999;						//跑得快消息结束	
+
+	MAHJONG_BEGIN = 3000;					//麻将消息起始
+		
+    T2P_RequestCreateMahjongHouse = 3001;              //玩家向网关服务器请求创建麻将房间
+    P2L_RequestCreateMahjongHouse = 3002;              //网关服务器转发玩家向网关服务器请求创建麻将房间
+    L2P_ReplyCreateMahjongHouse = 3003;                //逻辑服务器回复网关服务器创建麻将房间
+    P2T_ReplyCreateMahjongHouse = 3004;                //网关服务器响应创建麻将房间
+
+	T2P_RequestJoinMahjongHouse = 3005;              //玩家向网关服务器请求加入麻将房间
+    P2L_RequestJoinMahjongHouse = 3006;              //网关服务器转发玩家向网关服务器请求加入麻将房间
+    L2P_ReplyJoinMahjongHouse = 3007;                //逻辑服务器回复网关服务器加入麻将房间
+    P2T_ReplyJoinMahjongHouse = 3008;                //网关服务器响应加入麻将房间
+	
+    L2P_RecvJoinMahjongHouse = 3009;                //逻辑服务器回复网关服务器加入麻将房间
+    P2T_RecvJoinMahjongHouse = 3010;                //网关服务器响应加入麻将房间
+
+	T2P_RequestQuitMahjongHouse = 3011;				 //玩家向网关服务器请求退出房间
+    P2L_RequestQuitMahjongHouse  = 3012;              //网关服务器转发玩家向网关服务器请求退出房间
+    L2P_ReplyQuitMahjongHouse  = 3013;                //逻辑服务器回复网关服务器退出房间
+    P2T_ReplyQuitMahjongHouse  = 3014;                //网关服务器响应退出房间
+		
+    L2P_RecvQuitMahjongHouse  = 3015;                //逻辑服务器回复网关服务器退出房间
+    P2T_RecvQuitMahjongHouse  = 3016;                //网关服务器响应退出房间
+
+    L2P_RecvLeaveMahjongHouse  = 3017;                //逻辑服务器回复网关服务器离开房间
+    P2T_RecvLeaveMahjongHouse  = 3018;                //网关服务器响应离开房间		
+	
+	T2P_RequestMahjongHouseVote = 3019;				   //玩家向网关服务器请求解散房间投票
+    P2L_RequestMahjongHouseVote  = 3020;		       //网关服务器转发玩家向网关服务器请求解散房间投票
+    L2P_ReplyMahjongHouseVote  = 3021;			       //逻辑服务器回复网关服务器解散房间投票
+    P2T_ReplyMahjongHouseVote  = 3022;				   //网关服务器响应解散房间投票
+				
+    L2P_RecvMahjongHouseVote  = 3023;					//逻辑服务器回复网关服务器解散房间投票
+    P2T_RecvMahjongHouseVote  = 3024;					//网关服务器响应解散房间投票
+	
+    L2P_RecvBeginMahjong = 3025;					   //逻辑服务器回复网关服务器开始麻将
+    P2T_RecvBeginMahjong = 3026;					   //网关服务器响应开始麻将
+	
+	T2P_RequestMahjongPendulum = 3027;				   //玩家向网关服务器请求摆牌
+    P2L_RequestMahjongPendulum  = 3028;			       //网关服务器转发玩家向网关服务器请求摆牌
+    L2P_ReplyMahjongPendulum  = 3029;			       //逻辑服务器回复网关服务器摆牌
+    P2T_ReplyMahjongPendulum  = 3030;				   //网关服务器响应摆牌
+
+    L2P_RecvMahjongPendulum  = 3031;					//逻辑服务器回复网关服务器摆牌
+    P2T_RecvMahjongPendulum  = 3032;					//网关服务器响应摆牌
+
+    L2P_RecvMahjongEndPendulum  = 3033;					//逻辑服务器回复网关服务器结束摆牌
+    P2T_RecvMahjongEndPendulum  = 3034;					//网关服务器响应结束摆牌
+
+	T2P_RequestMahjongHouseInfo = 3035;				   //玩家向网关服务器请求房间信息
+    P2L_RequestMahjongHouseInfo  = 3036;               //网关服务器转发玩家向网关服务器请求房间信息
+    L2P_ReplyMahjongHouseInfo  = 3037;                 //逻辑服务器回复网关服务器房间信息
+    P2T_ReplyMahjongHouseInfo  = 3038;                 //网关服务器响应房间信息
+
+	T2P_RequestShowMahjong = 3039;				   //玩家向网关服务器请求出牌
+    P2L_RequestShowMahjong  = 3040;               //网关服务器转发玩家向网关服务器请求出牌
+    L2P_ReplyShowMahjong  = 3041;                 //逻辑服务器回复网关服务器出牌
+    P2T_ReplyShowMahjong  = 3042;                 //网关服务器响应出牌
+
+    L2P_RecvShowMahjong  = 3043;                 //逻辑服务器下发网关服务器出牌
+    P2T_RecvShowMahjong  = 3044;                 //网关服务器下发出牌
+
+    L2P_RecvGiveOffMahjong  = 3045;                 //逻辑服务器下发网关服务器发牌
+    P2T_RecvGiveOffMahjong  = 3046;                 //网关服务器下发发牌
+
+	T2P_RequestOperatMahjong = 3047;				//玩家向网关服务器请求操作
+    P2L_RequestOperatMahjong  = 3048;               //网关服务器转发玩家向网关服务器请求操作
+    L2P_ReplyOperatMahjong  = 3049;                 //逻辑服务器回复网关服务器操作
+    P2T_ReplyOperatMahjong  = 3050;                 //网关服务器响应操作
+
+    L2P_RecvOperatMahjong  = 3051;                 //逻辑服务器下发网关服务器操作
+    P2T_RecvOperatMahjong  = 3052;                 //网关服务器下发操作
+
+    L2P_RecvPlayerWinMahjong  = 3053;             //逻辑服务器下发网关服务器胡牌
+    P2T_RecvPlayerWinMahjong  = 3054;             //网关服务器下发胡牌
+	
+    L2P_RecvKongMahjong  = 3055;                  //逻辑服务器下发网关服务器杠
+    P2T_RecvKongMahjong  = 3056;                  //网关服务器下发杠
+
+    L2P_RecvSettlementMahjong  = 3057;            //逻辑服务器下发网关服务器小局结算
+    P2T_RecvSettlementMahjong  = 3058;            //网关服务器下发小局结算
+
+	T2P_RequestReadyMahjongHouse = 3059;			   //玩家向网关服务器请求准备
+    P2L_RequestReadyMahjongHouse  = 3060;              //网关服务器转发玩家向网关服务器请求准备
+    L2P_ReplyReadyMahjongHouse  = 3061;                //逻辑服务器回复网关服务器准备
+    P2T_ReplyReadyMahjongHouse  = 3062;                //网关服务器响应准备
+		
+    L2P_RecvReadyMahjongHouse  = 3063;                //逻辑服务器回复网关服务器准备
+    P2T_RecvReadyMahjongHouse  = 3064;                //网关服务器响应准备
+
+    L2P_RecvEndSettlementMahjong  = 3065;            //逻辑服务器下发网关服务器大局结算
+    P2T_RecvEndSettlementMahjong  = 3066;            //网关服务器下发大局结算
+
+    L2P_RecvSelectSeabedMahjong  = 3067;            //逻辑服务器下发网关服务器选择海底麻将
+    P2T_RecvSelectSeabedMahjong  = 3068;            //网关服务器下发选择海底麻将
+
+	T2P_RequestPlayerSelectSeabed = 3069;			//玩家向网关服务器请求选择海底
+    P2L_RequestPlayerSelectSeabed  = 3070;          //网关服务器转发玩家向网关服务器请求选择海底
+    L2P_ReplyPlayerSelectSeabed  = 3071;            //逻辑服务器回复网关服务器选择海底
+    P2T_ReplyPlayerSelectSeabed  = 3072;            //网关服务器响应选择海底
+
+    L2P_RecvPlayerSelectSeabed  = 3073;				//逻辑服务器下发网关服务器选择海底
+    P2T_RecvPlayerSelectSeabed  = 3074;				//网关服务器下发选择海底
+
+	T2P_RequestMahjongOverallRecord = 3075;				  //玩家向网关服务器请求大局战绩
+    P2L_RequestMahjongOverallRecord  = 3076;		      //网关服务器转发玩家向网关服务器请求大局战绩
+    L2D_RequestMahjongOverallRecord = 3077;				  //逻辑服务器请求大局战绩
+    D2L_ReplyMahjongOverallRecord  = 3078;				  //DB服务器响应大局战绩
+    L2P_ReplyMahjongOverallRecord  = 3079;			      //逻辑服务器回复网关服务器大局战绩
+    P2T_ReplyMahjongOverallRecord  = 3080;				  //网关服务器响应大局战绩
+	
+	T2P_RequestMahjongBureauRecord = 3081;				  //玩家向网关服务器请求小局战绩
+    P2L_RequestMahjongBureauRecord  = 3082;				  //网关服务器转发玩家向网关服务器请求小局战绩
+    L2D_RequestMahjongBureauRecord = 3083;				  //逻辑服务器请求小局战绩
+    D2L_ReplyMahjongBureauRecord  = 3084;				  //DB服务器响应小局战绩
+    L2P_ReplyMahjongBureauRecord  = 3085;			      //逻辑服务器回复网关服务器小局战绩
+    P2T_ReplyMahjongBureauRecord  = 3086;				  //网关服务器响应小局战绩
+	
+	T2P_RequestMahjongBureauPlayback = 3087;			  //玩家向网关服务器请求小局回放
+    P2L_RequestMahjongBureauPlayback  = 3088;			  //网关服务器转发玩家向网关服务器请求小局回放
+    L2D_RequestMahjongBureauPlayback = 3089;			  //逻辑服务器请求小局回放
+    D2L_ReplyMahjongBureauPlayback  = 3090;				  //DB服务器响应小局回放
+    L2P_ReplyMahjongBureauPlayback  = 3091;			      //逻辑服务器回复网关服务器小局回放
+    P2T_ReplyMahjongBureauPlayback  = 3092;				  //网关服务器响应小局回放
+
+	T2P_RequestMahjongPendulumDice = 3093;				   //玩家向网关服务器请求摆牌掷骰子
+    P2L_RequestMahjongPendulumDice  = 3094;			       //网关服务器转发玩家向网关服务器请求摆牌掷骰子
+    L2P_ReplyMahjongPendulumDice  = 3095;			       //逻辑服务器回复网关服务器摆牌掷骰子
+    P2T_ReplyMahjongPendulumDice  = 3096;				   //网关服务器响应摆牌掷骰子
+
+    L2P_RecvMahjongPendulumDice  = 3097;					//逻辑服务器回复网关服务器摆牌掷骰子
+    P2T_RecvMahjongPendulumDice  = 3098;					//网关服务器响应摆牌掷骰子
+	
+    L2D_RequestMahjongHouseInfo = 3099;					   //逻辑服务器请求房间信息
+    D2L_ReplyMahjongHouseInfo  = 3100;					   //DB服务器响应房间信息
+
+    L2D_RequestMahjongPlayerAndBureau = 3101;			   //逻辑服务器请求房间玩家信息和牌局信息
+    D2L_ReplyMahjongPlayerAndBureau  = 3102;			   //DB服务器响应房间玩家和牌局信息
+	
+    L2D_RequestSaveCreateMahjongInfo = 3103;			   //逻辑服务器请求保存创建信息
+    L2D_RequestSaveMahjongNewPlayer = 3104;                //逻辑服务器请求保存新麻将玩家信息	
+    L2D_RequestDelMahjongHousePlayer = 3105;		       //逻辑服务器请求保存房间删除玩家
+    L2D_RequestSaveMahjongHouseStatus = 3106;			   //逻辑服务器请求保存房间状态
+	L2D_RequestSaveMahjongBureauInfo = 3107;			   //逻辑服务器请求保存房间当局信息	
+    L2D_RequestSaveMahjongPlayerSettlement = 3108;		   //逻辑服务器请求保存房间玩家结算信息
+    L2D_RequestSaveMahjongBureauIntegral = 3109;		   //逻辑服务器请求保存房间当局积分
+	L2D_RequestSaveMahjongRecord = 3110;				   //逻辑服务器请求保存房间回放步骤
+	
+	T2P_RequestMahjongMidwayPendulum = 3111;				   //玩家向网关服务器请求中途四喜
+    P2L_RequestMahjongMidwayPendulum  = 3112;			       //网关服务器转发玩家向网关服务器请求中途四喜
+    L2P_ReplyMahjongMidwayPendulum  = 3113;			       //逻辑服务器回复网关服务器中途四喜
+    P2T_ReplyMahjongMidwayPendulum  = 3114;				   //网关服务器响应中途四喜
+
+    L2P_RecvMahjongMidwayPendulum  = 3115;					//逻辑服务器回复网关服务器中途四喜
+    P2T_RecvMahjongMidwayPendulum  = 3116;					//网关服务器响应中途四喜
+
+	T2P_RequestMahjongMidwayPendulumDice = 3117;				   //玩家向网关服务器请求中途四喜掷骰子
+    P2L_RequestMahjongMidwayPendulumDice  = 3118;			       //网关服务器转发玩家向网关服务器请求中途四喜掷骰子
+    L2P_ReplyMahjongMidwayPendulumDice  = 3119;			       //逻辑服务器回复网关服务器中途四喜掷骰子
+    P2T_ReplyMahjongMidwayPendulumDice  = 3120;				   //网关服务器响应中途四喜掷骰子
+
+    L2P_RecvMahjongMidwayPendulumDice  = 3121;					//逻辑服务器回复网关服务器中途四喜掷骰子
+    P2T_RecvMahjongMidwayPendulumDice  = 3122;					//网关服务器响应中途四喜掷骰子
+
+	L2D_RequestSaveDissolveMahjongInfo = 3123;					//逻辑服务器请求保存房间解散时同步信息
+
+	MAHJONG_END = 3999;	//麻将消息结束	
+	
+	WORDPLATE_BEGIN = 4000;				//字牌消息起始
+		
+    T2P_RequestCreateWordPlateHouse = 4001;              //玩家向网关服务器请求创建字牌房间
+    P2L_RequestCreateWordPlateHouse = 4002;              //网关服务器转发玩家向网关服务器请求创建字牌房间
+    L2P_ReplyCreateWordPlateHouse = 4003;                //逻辑服务器回复网关服务器创建字牌房间
+    P2T_ReplyCreateWordPlateHouse = 4004;                //网关服务器响应创建字牌房间
+
+	T2P_RequestJoinWordPlateHouse = 4005;              //玩家向网关服务器请求加入字牌房间
+    P2L_RequestJoinWordPlateHouse = 4006;              //网关服务器转发玩家向网关服务器请求加入字牌房间
+    L2P_ReplyJoinWordPlateHouse = 4007;                //逻辑服务器回复网关服务器加入字牌房间
+    P2T_ReplyJoinWordPlateHouse = 4008;                //网关服务器响应加入字牌房间
+	
+    L2P_RecvJoinWordPlateHouse = 4009;                //逻辑服务器回复网关服务器加入字牌房间
+    P2T_RecvJoinWordPlateHouse = 4010;                //网关服务器响应加入字牌房间
+
+	T2P_RequestQuitWordPlateHouse = 4011;				 //玩家向网关服务器请求退出房间
+    P2L_RequestQuitWordPlateHouse  = 4012;              //网关服务器转发玩家向网关服务器请求退出房间
+    L2P_ReplyQuitWordPlateHouse  = 4013;                //逻辑服务器回复网关服务器退出房间
+    P2T_ReplyQuitWordPlateHouse  = 4014;                //网关服务器响应退出房间
+		
+    L2P_RecvQuitWordPlateHouse  = 4015;                //逻辑服务器回复网关服务器退出房间
+    P2T_RecvQuitWordPlateHouse  = 4016;                //网关服务器响应退出房间
+
+    L2P_RecvLeaveWordPlateHouse  = 4017;                //逻辑服务器回复网关服务器离开房间
+    P2T_RecvLeaveWordPlateHouse  = 4018;                //网关服务器响应离开房间		
+	
+	T2P_RequestWordPlateHouseVote = 4019;				   //玩家向网关服务器请求解散房间投票
+    P2L_RequestWordPlateHouseVote  = 4020;		       //网关服务器转发玩家向网关服务器请求解散房间投票
+    L2P_ReplyWordPlateHouseVote  = 4021;			       //逻辑服务器回复网关服务器解散房间投票
+    P2T_ReplyWordPlateHouseVote  = 4022;				   //网关服务器响应解散房间投票
+				
+    L2P_RecvWordPlateHouseVote  = 4023;					//逻辑服务器回复网关服务器解散房间投票
+    P2T_RecvWordPlateHouseVote  = 4024;					//网关服务器响应解散房间投票
+	
+    L2P_RecvBeginWordPlate = 4025;					   //逻辑服务器回复网关服务器开始字牌
+    P2T_RecvBeginWordPlate = 4026;					   //网关服务器响应开始字牌	
+
+	T2P_RequestShowWordPlate = 4027;		 	    //玩家向网关服务器请求出牌
+    P2L_RequestShowWordPlate  = 4028;               //网关服务器转发玩家向网关服务器请求出牌
+    L2P_ReplyShowWordPlate  = 4029;                 //逻辑服务器回复网关服务器出牌
+    P2T_ReplyShowWordPlate  = 4030;                 //网关服务器响应出牌
+
+    L2P_RecvShowWordPlate  = 4031;                 //逻辑服务器下发网关服务器出牌
+    P2T_RecvShowWordPlate  = 4032;                 //网关服务器下发出牌	
+
+	T2P_RequestOperatWordPlate = 4033;				//玩家向网关服务器请求操作
+    P2L_RequestOperatWordPlate  = 4034;               //网关服务器转发玩家向网关服务器请求操作
+    L2P_ReplyOperatWordPlate  = 4035;                 //逻辑服务器回复网关服务器操作
+    P2T_ReplyOperatWordPlate  = 4036;                 //网关服务器响应操作
+
+    L2P_RecvOperatWordPlate  = 4037;                 //逻辑服务器下发网关服务器操作
+    P2T_RecvOperatWordPlate  = 4038;                 //网关服务器下发操作
+
+    L2P_RecvPlayerWinWordPlate  = 4039;             //逻辑服务器下发网关服务器胡牌
+    P2T_RecvPlayerWinWordPlate  = 4040;             //网关服务器下发胡牌
+
+	T2P_RequestReadyWordPlateHouse = 4041;			   //玩家向网关服务器请求准备
+    P2L_RequestReadyWordPlateHouse  = 4042;              //网关服务器转发玩家向网关服务器请求准备
+    L2P_ReplyReadyWordPlateHouse  = 4043;                //逻辑服务器回复网关服务器准备
+    P2T_ReplyReadyWordPlateHouse  = 4044;                //网关服务器响应准备
+		
+    L2P_RecvReadyWordPlateHouse  = 4045;                //逻辑服务器回复网关服务器准备
+    P2T_RecvReadyWordPlateHouse  = 4046;                //网关服务器响应准备
+
+	T2P_RequestWordPlateHouseInfo = 4047;				   //玩家向网关服务器请求房间信息
+    P2L_RequestWordPlateHouseInfo  = 4048;               //网关服务器转发玩家向网关服务器请求房间信息
+    L2P_ReplyWordPlateHouseInfo  = 4049;                 //逻辑服务器回复网关服务器房间信息
+    P2T_ReplyWordPlateHouseInfo  = 4050;                 //网关服务器响应房间信息
+	
+    L2P_RecvSettlementWordPlate  = 4051;            //逻辑服务器下发网关服务器小局结算
+    P2T_RecvSettlementWordPlate  = 4052;            //网关服务器下发小局结算
+
+    L2P_RecvEndSettlementWordPlate  = 4053;            //逻辑服务器下发网关服务器大局结算
+    P2T_RecvEndSettlementWordPlate  = 4054;            //网关服务器下发大局结算
+	
+    L2P_RecvPlayerPassChowWordPlate  = 4055;            //逻辑服务器下发网关服务器玩家吃臭牌
+    P2T_RecvPlayerPassChowWordPlate  = 4056;            //网关服务器下发玩家吃臭牌
+
+	T2P_RequestWordPlateOverallRecord = 4057;				  //玩家向网关服务器请求大局战绩
+    P2L_RequestWordPlateOverallRecord  = 4058;			      //网关服务器转发玩家向网关服务器请求大局战绩
+    L2D_RequestWordPlateOverallRecord = 4059;				  //逻辑服务器请求大局战绩
+    D2L_ReplyWordPlateOverallRecord  = 4060;				  //DB服务器响应大局战绩
+    L2P_ReplyWordPlateOverallRecord  = 4061;			      //逻辑服务器回复网关服务器大局战绩
+    P2T_ReplyWordPlateOverallRecord  = 4062;				  //网关服务器响应大局战绩
+	
+	T2P_RequestWordPlateBureauRecord = 4063;				  //玩家向网关服务器请求小局战绩
+    P2L_RequestWordPlateBureauRecord  = 4064;				  //网关服务器转发玩家向网关服务器请求小局战绩
+    L2D_RequestWordPlateBureauRecord = 4065;				  //逻辑服务器请求小局战绩
+    D2L_ReplyWordPlateBureauRecord  = 4066;				  //DB服务器响应小局战绩
+    L2P_ReplyWordPlateBureauRecord  = 4067;			      //逻辑服务器回复网关服务器小局战绩
+    P2T_ReplyWordPlateBureauRecord  = 4068;				  //网关服务器响应小局战绩
+	
+	T2P_RequestWordPlateBureauPlayback = 4069;			  //玩家向网关服务器请求小局回放
+    P2L_RequestWordPlateBureauPlayback  = 4070;			  //网关服务器转发玩家向网关服务器请求小局回放
+    L2D_RequestWordPlateBureauPlayback = 4071;			  //逻辑服务器请求小局回放
+    D2L_ReplyWordPlateBureauPlayback  = 4072;				  //DB服务器响应小局回放
+    L2P_ReplyWordPlateBureauPlayback  = 4073;			      //逻辑服务器回复网关服务器小局回放
+    P2T_ReplyWordPlateBureauPlayback  = 4074;				  //网关服务器响应小局回放
+	
+    L2D_RequestWordPlateHouseInfo = 4075;				  //逻辑服务器请求房间信息
+    D2L_ReplyWordPlateHouseInfo  = 4076;				  //DB服务器响应房间信息
+
+    L2D_RequestWordPlatePlayerAndBureau = 4077;			   //逻辑服务器请求房间玩家信息和牌局信息
+    D2L_ReplyWordPlatePlayerAndBureau  = 4078;			   //DB服务器响应房间玩家和牌局信息
+	
+    L2D_RequestSaveCreateWordPlateInfo = 4079;			   //逻辑服务器请求保存创建信息
+    L2D_RequestSaveWordPlateNewPlayer = 4080;              //逻辑服务器请求保存新字牌玩家信息	
+    L2D_RequestDelWordPlateHousePlayer = 4081;		       //逻辑服务器请求保存房间删除玩家
+    L2D_RequestSaveWordPlateHouseStatus = 4082;			   //逻辑服务器请求保存房间状态
+	L2D_RequestSaveWordPlateBureauInfo = 4083;			   //逻辑服务器请求保存房间当局信息	
+    L2D_RequestSaveWordPlatePlayerSettlement = 4084;	   //逻辑服务器请求保存房间玩家结算信息
+    L2D_RequestSaveWordPlateBureauIntegral = 4085;		   //逻辑服务器请求保存房间当局积分
+	L2D_RequestSaveWordPlateRecord = 4086;				   //逻辑服务器请求保存房间回放步骤
+
+	WORDPLATE_END = 4999;						//字牌消息结束	
+
+    MAX_MSG_ID = 65535; //不要超过该值     
+}
+
+//错误码
+enum ResultCode{
+    OK = 0;//成功
+    Wrong = 1;//错误
+		
+    InvalidPlayer = 2;//非法玩家
+	ExistRootUser = 3;//已存在超级管理员
+	NoAuth = 4;//没有权限
+	VistorAccountAlreadyBind = 5;//游客帐号已经绑定
+
+	GetServerConfigError = 6;	//获取玩家服务器配置表有误
+
+	PlayerHaveTheHouse = 7;	//玩家已经有房间
+	HouseCardNotEnough = 8; //房卡不够
+	GetHouseIdError = 9; //获取房间Id出错
+	TheHouseIsFull = 10; //房间已满
+	TheHouseNonexistence = 11; //房间不存在
+	PlayerHasBeenInTheHouse = 12; //已经在房间里面
+	PlayerHaveNotTheHouse = 13;	//玩家没有房间
+	PlayerHasNotBeenInTheHouse = 14; //该玩家没有在房间里面
+	PlayerSendShowCardError = 15; //发送过来的牌有误
+	PlayerHouserStutasErrod = 16; //当前玩家状态有误
+	HouseNextPlayerError = 17; //房间下一个玩家有误
+
+	ChatContentIsTooLong = 18;		//聊天内容过长
+	ChatFrequencyTooFast = 19;     //聊天频率过快
+
+	HouseGoingDissolveVote = 20;   //房间正在解散投票中
+	PlayerSendVoteStatusError = 21; //玩家发过来的投票状态有误
+		
+	PlayerGetDailySharing = 22; //玩家已经领取过每日分享奖励
+
+	WrongMarketConfig = 23;//错误的商场配置
+	MarketClosed = 24;//商场未营业
+	MarketKeyInvalid = 25;//商场口令有误或者已失效
+	MarketKeyUsedCountLimit = 26;//商场口令使用次数达上限
+
+	TheMessageHasBeenRequested = 27; //已请求过该信息
+	TicketsDoesNotExist = 28;		 //优惠券不存在
+	ThisTicketsExpired = 29;		 //优惠券已到期
+	UsedThisTicket = 30;			 //已使用该优惠券
+	
+	InvalidCode = 31;//无效邀请码	
+	AlreadyBelong = 32;//已经绑定过别人
+	AlreadyMiddleman = 33;//与目标已是间接关系链，请绑定其他人
+	AlreadyTargetBindMe = 34;//目标已绑定过我
+		
+	ClosedCreateHouse = 35; //已经关闭创建房间接口
+
+	PlayerJoinCompetition = 36;		//报名参加了比赛场
+	PlayerNoJoinCompetition = 37;	//没有参加比赛场
+	CompetitionKeyInvalid = 38;		//比赛场口令有误或者已失效
+	CompetitionNoApplyStatus = 39;	//比赛场不是报名状态
+	CompetitionPlayerNumFull = 40;	//比赛场人已经满了
+	CompetitionNoDissolve = 41;		//比赛场不能解散
+	CreateCompetitionDataError = 42;	//创建比赛场数据有误
+	MarketCompetitionClosed = 43;		//商场比赛场已关闭
+	MarketCompetitionLimitMax = 44;		//商场比赛场已达到上限
+
+	NotLoginedStatus = 45;//禁止登陆
+	ThisProductIdUnEnableBuy = 46;//这个商品不能购买
+	ServerIsClosed = 47;//没有服务器供负载连接
+
+	HouseNoNeedDissolveVote = 48;   //房间不需要投票
+
+    MaxResultCode = 65535;
+}

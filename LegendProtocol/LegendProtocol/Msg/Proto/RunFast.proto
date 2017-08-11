@@ -1,0 +1,1006 @@
+//公共定义
+import public "MsgBase.proto";
+import public "Common.proto";
+package LegendProtocol; 
+
+//跑得快类型
+enum RunFastType
+{     
+	Fifteen = 1;//十五张
+	Sixteen = 2;//十六张
+}
+
+//牌组类型
+enum PokerGroupType
+{
+	None = 0;		//空        
+	DanZhang = 1;	//单张        
+	DuiZi = 2;		//对子        
+	SanZhang = 3;	//三张        
+	ZhaDan = 4;		//炸弹        
+	ShunZi = 5;		//顺子        
+	Error = 6;		//错误
+}
+
+//跑得快玩家状态
+enum HousePlayerStatus
+{     
+	 Free = 1; //空闲
+	 Ready = 2; //准备
+	 WaitShowCard = 3; //等待出牌	 
+	 ShowCard = 4; //已出牌 
+	 Pass = 5; //要不起
+}
+
+//房间状态
+enum RunFastHouseStatus
+{     
+	 RFHS_FreeBureau = 1;	     //空闲	 
+	 RFHS_BeginBureau = 3;		 //开始状态
+	 RFHS_Settlement = 4;		 //结算状态	 
+	 RFHS_Dissolved = 5;		 //已经解散
+	 RFHS_EndBureau  = 6;		 //结束状态
+	 RFHS_GMDissolved = 7;		 //GM命令解散
+}
+
+//上线的玩家结构
+message PlayerOnlineNode
+{
+	optional int32 index = 1;
+	optional HousePlayerStatus housePlayerStatus = 2;
+    optional string ip = 3;
+	optional string nickName = 4;
+	optional int32 allIntegral = 5;
+	optional uint64 summonerId = 6;
+	optional LineType lineType = 7;
+    optional VoteStatus voteStatus = 8;
+    optional UserSex sex = 9;
+    optional bool bDanZhangFalg = 10;
+	optional int32 surplusCardCount = 11;
+}
+
+//上线的玩家结构
+message MyPlayerOnlineNode
+{
+	optional int32 index = 1;
+	optional HousePlayerStatus housePlayerStatus = 2;
+	optional int32 allIntegral = 3;
+    optional VoteStatus voteStatus = 4;
+	repeated Card playerCardList = 5;
+    optional bool bHosted = 6;
+}
+
+//跑得快上线结构
+message RunFastOnlineNode
+{
+	optional MyPlayerOnlineNode myPlayerOnline = 1;
+	repeated PlayerOnlineNode playerOnlineList = 2;
+}
+
+//简单的玩家结构
+message PlayerShowNode
+{
+	optional int32 index = 1;
+	optional HousePlayerStatus housePlayerStatus = 2;
+    optional string ip = 3;
+	optional string nickName = 4;
+	optional int32 allIntegral = 5;
+	optional uint64 summonerId = 6;
+	optional LineType lineType = 7;
+    optional UserSex sex = 8;
+}
+
+ //玩家的牌组
+message PlayerCardNode
+{
+	optional int32 index = 1;
+	repeated Card cardList = 2;
+}
+
+ //玩家的牌组
+message PlayerSaveCardNode
+{
+	optional int32 index = 1;
+	repeated int32 cardList = 2;
+} 
+
+//玩家的牌组
+message PlayerPlaybackCard
+{
+	repeated PlayerCardNode playerInitCardList = 1;
+	repeated PlayerCardNode playerShowCardList = 2;
+}
+
+//玩家的牌组
+message HousePlayerBureau
+{
+    repeated HousePlayerNode housePlayerList = 1;
+    repeated HouseBureau houseBureauList = 2;
+}
+
+//结算玩家
+message PlayerSettlementNode
+{
+	optional int32 index = 1;
+	optional int32 cardIntegral = 2;
+    optional int32 bureauIntegral = 3;
+    optional int32 bombIntegral = 4;
+    optional int32 allIntegral = 5;
+	repeated Card cardList = 6;
+	optional string nickName = 7;
+	optional bool bStrongOff = 8;
+}
+
+//最后结算玩家
+message PlayerEndSettlementNode
+{
+	optional int32 index = 1;
+	optional int32 winBureau = 2;
+    optional int32 loseBureau = 3;
+    optional int32 bombIntegral = 4;
+    optional int32 maxIntegral = 5;
+}
+
+//房间保存结构
+message RunFastHouseNode
+{
+	optional uint64 houseId = 1;
+    optional int32 houseCardId = 2;
+    optional int32 currentBureau = 3;
+    optional int32 maxBureau = 4;
+	optional int32 maxPlayerNum = 5;
+    optional HouseType houseType = 6;
+    optional int32 runFastType = 7;
+    optional RunFastHouseStatus houseStatus = 8;
+    optional string createTime = 9;
+	optional int32 housePropertyType = 10;
+	optional int32 businessId = 11;
+	optional int32 zhuangPlayerIndex = 12;
+	optional int32 logicId = 13;
+}
+
+//房间玩家结构
+message HousePlayerNode
+{
+    optional string userId = 1;
+    optional int32 index = 2;
+	optional uint64 summonerId = 3;
+    optional string nickName = 4;
+    optional int32 winBureau = 5;
+    optional int32 loseBureau = 6;
+    optional int32 allIntegral = 7;
+    optional int32 bombIntegral = 8;
+    optional UserSex sex = 9;
+}
+
+message PlayerBureauIntegral
+{
+    optional int32 playerIndex = 1;   
+    optional int32 bombIntegral = 2;   //炸弹积分
+    optional int32 cardIntegral = 3;   //棋牌积分    
+    optional int32 bureauIntegral = 4; //当局总积分
+}
+
+message HouseBureau
+{
+    optional uint64 bureau = 1;   
+    repeated PlayerBureauIntegral playerBureauList = 2;
+    optional string bureauTime = 3;   
+}
+
+//协议结构
+/// <summary>
+/// 玩家向网关服务器请求创建跑得快房间
+message RequestCreateRunFastHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestCreateRunFastHouse];
+	optional RunFastType runFastType = 2;
+	optional int32 maxBureau = 3;
+    optional int32 maxPlayerNum = 4;
+	optional int32 housePropertyType = 5;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求创建跑得快房间
+message RequestCreateRunFastHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestCreateRunFastHouse];
+    optional uint64 summonerId = 2;
+	optional RunFastType runFastType = 3;
+	optional int32 maxBureau = 4;
+    optional int32 maxPlayerNum = 5;
+	optional int32 housePropertyType = 6;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家创建跑得快房间
+message ReplyCreateRunFastHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyCreateRunFastHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional RunFastType runFastType = 4;
+	optional int32 maxBureau = 5;
+	optional int32 houseId = 6;
+	optional int32 allIntegral = 7;
+	optional uint64 onlyHouseId = 8;
+    optional int32 maxPlayerNum = 9;
+	optional int32 housePropertyType = 10;
+	optional int32 businessId = 11;
+	optional int32 competitionKey = 12;
+	optional HousePlayerStatus housePlayerStatus = 13;
+}
+/// <summary>
+/// 网关服务器响应玩家创建跑得快房间
+message ReplyCreateRunFastHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyCreateRunFastHouse];
+    optional ResultCode result = 2;
+	optional RunFastType runFastType = 3;
+	optional int32 maxBureau = 4;
+	optional int32 houseId = 5;
+	optional int32 allIntegral = 6;
+	optional uint64 onlyHouseId = 7;
+    optional int32 maxPlayerNum = 8;
+	optional int32 housePropertyType = 9;
+	optional int32 businessId = 10;
+	optional int32 competitionKey = 11;
+	optional HousePlayerStatus housePlayerStatus = 12;
+}
+/// <summary>
+/// 玩家向网关服务器请求加入跑得快房间
+message RequestJoinRunFastHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestJoinRunFastHouse];
+	optional int32 houseId = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求加入跑得快房间
+message RequestJoinRunFastHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestJoinRunFastHouse];
+    optional uint64 summonerId = 2;
+	optional int32 houseId = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家加入跑得快房间
+message ReplyJoinRunFastHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyJoinRunFastHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional RunFastType runFastType = 4;
+	optional int32 maxBureau = 5;
+	optional int32 houseId = 6;
+	repeated PlayerShowNode playerShowList = 7;
+	optional int32 allIntegral = 8;
+	optional uint64 onlyHouseId = 9;
+    optional int32 maxPlayerNum = 10;
+	optional int32 housePropertyType = 11;
+	optional int32 businessId = 12;
+	optional int32 competitionKey = 13;
+	optional HousePlayerStatus housePlayerStatus = 14;
+	optional int32 myIndex = 15;
+}
+/// <summary>
+/// 网关服务器响应玩家加入跑得快房间
+message ReplyJoinRunFastHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyJoinRunFastHouse];
+    optional ResultCode result = 2;
+	optional RunFastType runFastType = 3;
+	optional int32 maxBureau = 4;
+	optional int32 houseId = 5;
+	repeated PlayerShowNode playerShowList = 6;
+	optional int32 allIntegral = 7;
+	optional uint64 onlyHouseId = 8;
+    optional int32 maxPlayerNum = 9;
+	optional int32 housePropertyType = 10;
+	optional int32 businessId = 11;
+	optional int32 competitionKey = 12;
+	optional HousePlayerStatus housePlayerStatus = 13;
+	optional int32 myIndex = 14;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家加入跑得快房间
+message RecvJoinRunFastHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvJoinRunFastHouse];
+    optional uint64 summonerId = 2;
+	optional PlayerShowNode playerShow = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家加入跑得快房间
+message RecvJoinRunFastHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvJoinRunFastHouse];
+	optional PlayerShowNode playerShow = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家开始跑得快
+message RecvBeginRunFast_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvBeginRunFast];
+    optional uint64 summonerId = 2;
+	optional int32 currentShowCard = 3;
+	optional int32 currentBureau = 4;
+	repeated Card cardList = 5;
+	optional HousePlayerStatus housePlayerStatus = 6;
+}
+/// <summary>
+/// 网关服务器响应玩家开始跑得快
+message RecvBeginRunFast_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvBeginRunFast];
+	optional int32 currentShowCard = 2;
+	optional int32 currentBureau = 3;
+	repeated Card cardList = 4;
+	optional HousePlayerStatus housePlayerStatus = 5;
+}
+/// <summary>
+/// 玩家向网关服务器请求出牌
+message RequestShowRunFastCard_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestShowRunFastCard];
+	repeated Card cardList = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求出牌
+message RequestShowRunFastCard_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestShowRunFastCard];
+    optional uint64 summonerId = 2;
+	repeated Card cardList = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器出牌
+message ReplyShowRunFastCard_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyShowRunFastCard];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional int32 currentShowCard = 4;
+	repeated Card cardList = 5;
+	optional bool bDanZhangFalg = 6;
+    optional PokerGroupType pokerGroupType = 7;
+}
+/// <summary>
+/// 网关服务器响应玩家出牌
+message ReplyShowRunFastCard_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyShowRunFastCard];
+    optional ResultCode result = 2;
+	optional int32 currentShowCard = 3;
+	repeated Card cardList = 4;
+	optional bool bDanZhangFalg = 5;
+    optional PokerGroupType pokerGroupType = 6;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家出牌
+message RecvShowRunFastCard_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvShowRunFastCard];
+    optional uint64 summonerId = 2;
+	repeated Card cardList = 3;
+	optional int32 currentWhoPlay = 4;
+	optional int32 currentShowCard = 5;
+	optional HousePlayerStatus housePlayerStatus = 6;
+	optional bool bDanZhangFalg = 7;
+    optional PokerGroupType pokerGroupType = 8;
+}
+/// <summary>
+/// 网关服务器响应玩家出牌
+message RecvShowRunFastCard_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvShowRunFastCard];
+	repeated Card cardList = 2;
+	optional int32 currentWhoPlay = 3;
+	optional int32 currentShowCard = 4;
+	optional HousePlayerStatus housePlayerStatus = 5;
+	optional bool bDanZhangFalg = 6;
+    optional PokerGroupType pokerGroupType = 7;
+}
+/// <summary>
+/// 玩家向网关服务器请求过牌
+message RequestPassRunFastCard_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestPassRunFastCard];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求过牌
+message RequestPassRunFastCard_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestPassRunFastCard];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器过牌
+message ReplyPassRunFastCard_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyPassRunFastCard];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional int32 currentShowCard = 4;
+}
+/// <summary>
+/// 网关服务器响应玩家过牌
+message ReplyPassRunFastCard_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyPassRunFastCard];
+    optional ResultCode result = 2;
+	optional int32 currentShowCard = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家过牌
+message RecvPassRunFastCard_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvPassRunFastCard];
+    optional uint64 summonerId = 2;
+	optional int32 currentShowCard = 3;
+	optional HousePlayerStatus housePlayerStatus = 4;
+}
+/// <summary>
+/// 网关服务器响应玩家过牌
+message RecvPassRunFastCard_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvPassRunFastCard];
+	optional int32 currentShowCard = 2;
+	optional HousePlayerStatus housePlayerStatus = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求退出房间
+message RequestQuitRunFastHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestQuitRunFastHouse];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求退出房间
+message RequestQuitRunFastHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestQuitRunFastHouse];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器退出房间
+message ReplyQuitRunFastHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyQuitRunFastHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+	optional bool bVote = 4;
+    optional int32 dissolveVoteTime = 5;
+}
+/// <summary>
+/// 网关服务器响应玩家退出房间
+message ReplyQuitRunFastHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyQuitRunFastHouse];
+    optional ResultCode result = 2;
+	optional bool bVote = 3;
+    optional int32 dissolveVoteTime = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家退出房间
+message RecvQuitRunFastHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvQuitRunFastHouse];
+    optional uint64 summonerId = 2;
+	optional bool bVote = 3;
+    optional int32 index = 4;
+    optional int32 dissolveVoteTime = 5;
+}
+/// <summary>
+/// 网关服务器响应玩家退出房间
+message RecvQuitRunFastHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvQuitRunFastHouse];
+	optional bool bVote = 2;
+    optional int32 index = 3;
+    optional int32 dissolveVoteTime = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家离开房间
+message RecvLeaveRunFastHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvLeaveRunFastHouse];
+    optional uint64 summonerId = 2;
+	optional int32 leaveIndex = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家离开房间
+message RecvLeaveRunFastHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvLeaveRunFastHouse];
+	optional int32 leaveIndex = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家炸弹积分
+message RecvZhaDanIntegral_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvZhaDanIntegral];
+    optional uint64 summonerId = 2;
+	repeated PlayerIntegral playerIntegralList = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家炸弹积分
+message RecvZhaDanIntegral_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvZhaDanIntegral];
+	repeated PlayerIntegral playerIntegralList = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器结算
+message RecvSettlementRunFast_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvSettlementRunFast];
+    optional uint64 summonerId = 2;
+	optional bytes playerSettlement = 3;
+	optional SettlementType settlementType = 4;
+}
+/// <summary>
+/// 网关服务器响应结算
+message RecvSettlementRunFast_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvSettlementRunFast];
+	optional bytes playerSettlement = 2;
+	optional SettlementType settlementType = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求准备
+message RequestReadyRunFastHouse_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestReadyRunFastHouse];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求准备
+message RequestReadyRunFastHouse_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestReadyRunFastHouse];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器准备
+message ReplyReadyRunFastHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyReadyRunFastHouse];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家准备
+message ReplyReadyRunFastHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyReadyRunFastHouse];
+    optional ResultCode result = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器玩家准备
+message RecvReadyRunFastHouse_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvReadyRunFastHouse];
+    optional uint64 summonerId = 2;
+	optional int32 readyIndex = 3;
+}
+/// <summary>
+/// 网关服务器响应玩家准备
+message RecvReadyRunFastHouse_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvReadyRunFastHouse];
+	optional int32 readyIndex = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器结算
+message RecvEndSettlementRunFast_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvEndSettlementRunFast];
+    optional uint64 summonerId = 2;
+	optional RunFastHouseStatus houseStatus = 3;
+	repeated PlayerEndSettlementNode playerEndSettlementList = 4;
+	optional int32 allIntegral = 5;
+	optional TicketsNode ticketsNode = 6;
+}
+/// <summary>
+/// 网关服务器响应结算
+message RecvEndSettlementRunFast_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvEndSettlementRunFast];
+	repeated PlayerEndSettlementNode playerEndSettlementList = 2;
+	optional RunFastHouseStatus houseStatus = 3;
+	optional int32 allIntegral = 4;
+	optional TicketsNode ticketsNode = 5;
+}
+/// <summary>
+/// 玩家向网关服务器请求房间信息
+message RequestRunFastHouseInfo_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestRunFastHouseInfo];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求房间信息
+message RequestRunFastHouseInfo_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestRunFastHouseInfo];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器房间信息
+message ReplyRunFastHouseInfo_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyRunFastHouseInfo];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional int32 houseCardId = 4;
+    optional RunFastHouseStatus houseStatus = 5;
+	optional RunFastType runFastType = 6;
+	optional int32 maxBureau = 7;
+	optional int32 currentBureau = 8;
+	optional int32 currentShowCard = 9;
+	optional int32 currentWhoPlay = 10;
+	repeated Card houseCardList = 11;
+	optional int32 zhuangPlayerIndex = 12;
+	optional bytes runFastOnlineNode = 13;
+	optional double houseVoteTime = 14;
+	optional int32 businessId = 15;
+	optional uint64 onlyHouseId = 16;
+    optional PokerGroupType pokerGroupType = 17;
+    optional int32 maxPlayerNum = 18;
+	optional int32 housePropertyType = 19;
+	optional int32 competitionKey = 20;
+}
+/// <summary>
+/// 网关服务器响应房间信息
+message ReplyRunFastHouseInfo_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyRunFastHouseInfo];
+    optional ResultCode result = 2;
+	optional int32 houseCardId = 3;
+    optional RunFastHouseStatus houseStatus = 4;
+	optional RunFastType runFastType = 5;
+	optional int32 maxBureau = 6;
+	optional int32 currentBureau = 7;
+	optional int32 currentShowCard = 8;
+	optional int32 currentWhoPlay = 9;
+	repeated Card houseCardList = 10;
+	optional int32 zhuangPlayerIndex = 11;
+	optional bytes runFastOnlineNode = 12;
+	optional double houseVoteTime = 13;
+	optional int32 businessId = 14;
+	optional uint64 onlyHouseId = 15;
+    optional PokerGroupType pokerGroupType = 16;
+    optional int32 maxPlayerNum = 17;
+	optional int32 housePropertyType = 18;
+	optional int32 competitionKey = 19;
+}
+/// <summary>
+/// 玩家向网关服务器请求解散房间投票
+message RequestDissolveHouseVote_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestDissolveHouseVote];
+	optional VoteStatus voteStatus = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求解散房间投票
+message RequestDissolveHouseVote_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestDissolveHouseVote];
+    optional uint64 summonerId = 2;
+	optional VoteStatus voteStatus = 3;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器解散房间投票
+message ReplyDissolveHouseVote_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyDissolveHouseVote];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional VoteStatus voteStatus = 4;
+	optional VoteStatus houseVoteStatus = 5;
+}
+/// <summary>
+/// 网关服务器响应房间解散房间投票
+message ReplyDissolveHouseVote_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyDissolveHouseVote];
+    optional ResultCode result = 2;
+	optional VoteStatus voteStatus = 3;
+	optional VoteStatus houseVoteStatus = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器解散房间投票
+message RecvDissolveHouseVote_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_RecvDissolveHouseVote];
+    optional uint64 summonerId = 2;
+	optional int32 index = 3;
+	optional VoteStatus voteStatus = 4;
+	optional VoteStatus houseVoteStatus = 5;
+}
+/// <summary>
+/// 网关服务器响应解散房间投票
+message RecvDissolveHouseVote_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_RecvDissolveHouseVote];
+	optional int32 index = 2;
+	optional VoteStatus voteStatus = 3;
+	optional VoteStatus houseVoteStatus = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求大局战绩
+message RequestRunFastOverallRecord_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestRunFastOverallRecord];
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求大局战绩
+message RequestRunFastOverallRecord_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestRunFastOverallRecord];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// 逻辑服务器请求大局战绩
+message RequestRunFastOverallRecord_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestRunFastOverallRecord];
+    optional uint64 summonerId = 2;
+}
+/// <summary>
+/// DB服务器响应大局战绩
+message ReplyRunFastOverallRecord_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyRunFastOverallRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional bytes overallRecord = 4;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器大局战绩
+message ReplyRunFastOverallRecord_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyRunFastOverallRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional bytes overallRecord = 4;
+}
+/// <summary>
+/// 网关服务器响应房间大局战绩
+message ReplyRunFastOverallRecord_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyRunFastOverallRecord];
+    optional ResultCode result = 2;
+	optional bytes overallRecord = 3;
+}
+/// <summary>
+/// 玩家向网关服务器请求小局战绩
+message RequestRunFastBureauRecord_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestRunFastBureauRecord];
+	optional uint64 onlyHouseId = 2;
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求小局战绩
+message RequestRunFastBureauRecord_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestRunFastBureauRecord];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+}
+/// <summary>
+/// 逻辑服务器请求小局战绩
+message RequestRunFastBureauRecord_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestRunFastBureauRecord];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+}
+/// <summary>
+/// DB服务器响应小局战绩
+message ReplyRunFastBureauRecord_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyRunFastBureauRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional bytes bureauRecord = 5;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器小局战绩
+message ReplyRunFastBureauRecord_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyRunFastBureauRecord];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional bytes bureauRecord = 5;
+}
+/// <summary>
+/// 网关服务器响应房间小局战绩
+message ReplyRunFastBureauRecord_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyRunFastBureauRecord];
+    optional ResultCode result = 2;
+	optional uint64 onlyHouseId = 3;
+	optional bytes bureauRecord = 4;
+}
+/// <summary>
+/// 玩家向网关服务器请求小局回放
+message RequestRunFastBureauPlayback_T2P
+{
+	optional MsgID msgId = 1 [default = T2P_RequestRunFastBureauPlayback];
+	optional uint64 onlyHouseId = 2;
+	optional uint64 bureau = 3;	
+}
+/// <summary>
+/// 网关服务器转发玩家向网关服务器请求小局回放
+message RequestRunFastBureauPlayback_P2L
+{
+	optional MsgID msgId = 1 [default = P2L_RequestRunFastBureauPlayback];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+	optional uint64 bureau = 4;	
+}
+/// <summary>
+/// 逻辑服务器请求小局回放
+message RequestRunFastBureauPlayback_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestRunFastBureauPlayback];
+    optional uint64 summonerId = 2;
+	optional uint64 onlyHouseId = 3;
+	optional uint64 bureau = 4;	
+}
+/// <summary>
+/// DB服务器响应小局回放
+message ReplyRunFastBureauPlayback_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyRunFastBureauPlayback];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional uint64 bureau = 5;
+	optional bytes playerCard = 6;
+}
+/// <summary>
+/// 逻辑服务器回复网关服务器小局回放
+message ReplyRunFastBureauPlayback_L2P
+{
+	optional MsgID msgId = 1 [default = L2P_ReplyRunFastBureauPlayback];
+    optional uint64 summonerId = 2;
+    optional ResultCode result = 3;	
+	optional uint64 onlyHouseId = 4;
+	optional uint64 bureau = 5;	
+	optional bytes playerCard = 6;
+}
+/// <summary>
+/// 网关服务器响应房间小局回放
+message ReplyRunFastBureauPlayback_P2T
+{
+	optional MsgID msgId = 1 [default = P2T_ReplyRunFastBureauPlayback];
+    optional ResultCode result = 2;
+	optional uint64 onlyHouseId = 3;
+	optional uint64 bureau = 4;	
+	optional bytes playerCard = 5;
+}
+//////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 逻辑服务器请求房间信息
+message RequestHouseInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestHouseInfo];
+    optional int32 logicId = 2;
+}
+/// <summary>
+/// DB服务器响应房间信息
+message ReplyHouseInfo_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyHouseInfo];
+	optional bytes house = 2;
+}
+/// <summary>
+/// 逻辑服务器请求房间玩家信息和牌局信息
+message RequestHousePlayerAndBureau_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestHousePlayerAndBureau];
+	optional uint64 houseId = 2;
+}
+/// <summary>
+/// DB服务器响应房间玩家和牌局信息
+message ReplyHousePlayerAndBureau_D2L
+{
+	optional MsgID msgId = 1 [default = D2L_ReplyHousePlayerAndBureau];
+	optional uint64 houseId = 2;
+    optional bytes housePlayerBureau = 3;
+}
+message RequestSaveCreateRunFastInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveCreateRunFastInfo];
+	optional uint64 houseId = 2;
+    optional int32 houseCardId = 3;
+    optional int32 maxBureau = 4;
+    optional int32 maxPlayerNum = 5;
+    optional HouseType houseType = 6;
+    optional int32 runFastType = 7;
+	optional int32 housePropertyType = 8;
+    optional string createTime = 9;
+	optional int32 businessId = 10;
+	optional int32 logicId = 11;
+    optional uint64 summonerId = 12;
+    optional int32 index = 13;
+    optional int32 allIntegral = 14;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间玩家信息
+message RequestSaveRunFastNewPlayer_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveRunFastNewPlayer];
+	optional uint64 houseId = 2;
+    optional uint64 summonerId = 3;
+    optional int32 index = 4;
+    optional int32 allIntegral = 5;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间删除玩家
+message RequestDelHousePlayer_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestDelHousePlayer];
+	optional uint64 houseId = 2;
+    optional uint64 summonerId = 3;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间当局出牌信息
+message RequestSaveBureauShowCard_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveBureauShowCard];
+	optional uint64 houseId = 2;
+    optional uint64 bureau = 3;
+	optional PlayerCardNode playerCard = 4;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间玩家结算信息
+message RequestSaveRunFastPlayerSettlement_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveRunFastPlayerSettlement];
+	optional uint64 houseId = 2;
+    optional uint64 summonerId = 3;
+    optional int32 winBureau = 4;
+    optional int32 loseBureau = 5;
+    optional int32 allIntegral = 6;
+    optional int32 bombIntegral = 7;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间状态
+message RequestSaveRunFastHouseStatus_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveRunFastHouseStatus];
+	optional uint64 houseId = 2;
+    optional RunFastHouseStatus houseStatus = 3;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间当局信息
+message RequestSaveRunFastBureauInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveRunFastBureauInfo];
+	optional uint64 houseId = 2;
+    optional uint64 bureau = 3;   
+    repeated int32 playerBureauList = 4;
+    optional string bureauTime = 5; 
+	optional bytes playerInitCard = 6;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间当局积分
+message RequestSaveRunFastBureauIntegral_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveRunFastBureauIntegral];
+	optional uint64 houseId = 2;
+    optional uint64 bureau = 3;
+	repeated PlayerBureauIntegral bureauIntegralList = 4;
+    optional int32 zhuangPlayerIndex = 5;
+}
+/// <summary>
+/// 逻辑服务器请求保存房间解散时同步信息
+message RequestSaveDissolveRunFastInfo_L2D
+{
+	optional MsgID msgId = 1 [default = L2D_RequestSaveDissolveRunFastInfo];
+	optional uint64 houseId = 2;
+    optional uint64 currentBureau = 3;
+	repeated PlayerBureauIntegral playerBureauList = 4;
+	repeated PlayerIntegral playerIntegralList = 5;
+}
+

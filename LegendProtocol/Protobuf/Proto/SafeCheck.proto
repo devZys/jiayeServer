@@ -1,0 +1,8 @@
+//安全检测
+import public "MsgBase.proto";
+package LegendProtocol; 
+
+//超长心跳包[主要给后台工具测试用]
+message LongHeartBeat_X2P { 
+	optional MsgID msgId 			= 1 [default = X2P_LongHeartBeat];
+}
